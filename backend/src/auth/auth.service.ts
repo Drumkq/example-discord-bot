@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Profile } from 'passport-discord';
 import { IUser } from 'src/models/user/user.interface';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  async validateUser(
+  async validateDiscordUser(
     profile: Profile,
     accessToken: string,
     refreshToken: string,
@@ -23,6 +27,19 @@ export class AuthService {
       });
     }
 
-    return user;
+    const differentTokens =
+      user.accessToken === accessToken && user.refreshToken === refreshToken;
+
+    if (differentTokens) {
+      user.set('accessToken', accessToken);
+      user.set('refreshToken', refreshToken);
+      await user.save();
+    }
+
+    return user.get({ plain: true });
+  }
+
+  async validateKey(secret: string): Promise<boolean> {
+    return this.configService.get<string>('CLIENT_SECRET') === secret;
   }
 }

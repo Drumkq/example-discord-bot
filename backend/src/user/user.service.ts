@@ -27,7 +27,9 @@ export class UserService {
         return {
           id: null,
           guildId: v.id,
+          botInvited: false,
           ownerId: user.userId,
+          coownerIds: [],
           icon: v.icon,
           name: v.name,
           features: Features.None,
@@ -38,14 +40,12 @@ export class UserService {
 
   async isInGuild(/*guildId: string, ids: string[]*/) {}
 
-  async getUser(userId: string): Promise<IUser> {
-    return (await this.userModel.findOne({ where: { userId: userId } })).get({
-      plain: true,
-    });
+  async getUser(userId: string): Promise<UserModel> {
+    return await this.userModel.findOne({ where: { userId: userId } });
   }
 
-  async createUser(user: CreateUserDto): Promise<IUser> {
-    return (await this.userModel.create(user)).get({ plain: true });
+  async createUser(user: CreateUserDto): Promise<UserModel> {
+    return await this.userModel.create(user);
   }
 
   async getAccessToken() {}

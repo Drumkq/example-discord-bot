@@ -24,7 +24,7 @@ export class DiscordStraregy extends PassportStrategy(Strategy) {
     refreshToken: string,
     profile: Profile,
   ): Promise<IUser> {
-    const user = await this.authService.validateUser(
+    const user = await this.authService.validateDiscordUser(
       profile,
       accessToken,
       refreshToken,

@@ -1,9 +1,10 @@
 import {
+  IsArray,
+  IsBoolean,
   IsDivisibleBy,
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
 } from 'class-validator';
 import { Features } from '../utils/features.enum';
@@ -11,34 +12,34 @@ import { IGuild } from './guild.interface';
 
 export class CreateGuildDto implements IGuild {
   @IsOptional()
-  @IsNotEmpty()
   @IsNumber()
   public readonly id: number;
 
-  @IsOptional()
   @IsNotEmpty()
   @IsString()
   public readonly guildId: string;
 
-  @IsOptional()
+  @IsNotEmpty()
+  @IsBoolean()
+  public readonly botInvited: boolean;
+
   @IsNotEmpty()
   @IsString()
   public readonly ownerId: string;
 
-  @IsOptional()
+  @IsArray()
+  public readonly coownerIds?: string[];
+
   @IsNotEmpty()
   @IsString()
-  icon: string;
+  public readonly icon: string;
 
-  @IsOptional()
   @IsNotEmpty()
   @IsString()
-  name: string;
+  public readonly name: string;
 
-  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
-  @IsPositive()
   @IsDivisibleBy(2)
-  features: Features;
+  public readonly features: Features;
 }

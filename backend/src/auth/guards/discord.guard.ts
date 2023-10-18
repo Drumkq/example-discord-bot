@@ -7,7 +7,9 @@ export class DiscordGuard extends AuthGuard('discord') {
     const res = (await super.canActivate(context)) as boolean;
     const req = context.switchToHttp().getRequest();
 
-    await super.logIn(req);
+    if (!req.isAuthenticated()) {
+      await super.logIn(req);
+    }
 
     return res;
   }

@@ -1,5 +1,5 @@
 import { Column, Model, Table } from 'sequelize-typescript';
-import { NUMBER, STRING } from 'sequelize';
+import { BOOLEAN, NUMBER, STRING } from 'sequelize';
 import { Features } from '../utils/features.enum';
 import { IGuild } from './guild.interface';
 
@@ -9,7 +9,7 @@ export class GuildModel extends Model<IGuild> {
     primaryKey: true,
     unique: true,
     type: NUMBER,
-    validate: { notEmpty: true, isUUID: 4 },
+    validate: { notEmpty: true },
   })
   id: number;
 
@@ -21,11 +21,28 @@ export class GuildModel extends Model<IGuild> {
   guildId: string;
 
   @Column({
+    type: BOOLEAN,
+    validate: { notEmpty: true },
+  })
+  botInvited: boolean;
+
+  @Column({
     unique: true,
     type: STRING,
     validate: { notEmpty: true },
   })
   ownerId: string;
+
+  @Column({
+    type: STRING,
+    get(): string {
+      return this.getDataValue('coownerIds').split(';');
+    },
+    set(val: string[]) {
+      this.setDataValue('coownerIds', val.join(';'));
+    },
+  })
+  coownerIds?: string[];
 
   @Column({
     type: STRING,
