@@ -7,11 +7,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0B0B0B',
-        border: '#121212',
-        'border-active': '#222222',
-        'background-active': '#171717',
-        text: '#ADADAD'
+        active: '#E43131',
+        'inactive-prim': '#E8E8E8',
+        'inactive-sec': '#444444',
       },
       content: {
         'link': 'url("../../assets/arrow.png")'
