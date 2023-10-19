@@ -1,41 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import axios from 'axios';
-import { IGuild } from 'src/models/guild/guild.interface';
+import { DiscordService } from 'src/discord/discord.service';
 import { CreateUserDto } from 'src/models/user/createUser.dto';
 import { IUser } from 'src/models/user/user.interface';
 import { UserModel } from 'src/models/user/user.model';
-import { Features } from 'src/models/utils/features.enum';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(UserModel) private readonly userModel: typeof UserModel,
+    private readonly discord: DiscordService,
   ) {}
 
   async getGuilds(user: IUser) {
-    const guildsJson: Array<any> = (
-      await axios.get('https://discord.com/api/v10/users/@me/guilds', {
-        headers: {
-          Authorization: `Bearer ${user.accessToken}`,
-        },
-      })
-    ).data;
-
-    return guildsJson.map<IGuild>((v: any) => {
-      if (v.owner) {
-        return {
-          id: null,
-          guildId: v.id,
-          botInvited: false,
-          ownerId: user.userId,
-          coownerIds: [],
-          icon: v.icon,
-          name: v.name,
-          features: Features.None,
-        };
-      }
-    });
+    return (await this.discord.getUserGuilds(user)).map((v) => v.owner);
   }
 
   async isInGuild(/*guildId: string, ids: string[]*/) {}

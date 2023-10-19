@@ -1,20 +1,27 @@
-import { Body, Controller, Delete, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Put, UseGuards } from '@nestjs/common';
 import { ApiKeyGuard } from 'src/auth/guards/apikey.guard';
 import { GuildService } from './guild.service';
+import { IGuild } from 'src/models/guild/guild.interface';
 
 @Controller('guild')
 export class GuildController {
   constructor(private readonly guildService: GuildService) {}
 
-  @Post('join')
+  @Put('join')
   @UseGuards(ApiKeyGuard)
   async joinEvent(@Body() guildId: string) {
     return await this.guildService.botJoinedGuild(guildId);
   }
 
-  @Delete('leave')
+  @Put('leave')
   @UseGuards(ApiKeyGuard)
   async leaveEvent(@Body() guildId: string) {
     return await this.guildService.botLeavedGuild(guildId);
+  }
+
+  @Patch('change/:guildId')
+  @UseGuards(ApiKeyGuard)
+  async patchGuild(@Param('guildId') guildId, @Body() guild: IGuild) {
+    return await this.guildService.patchGuild(guildId, guild);
   }
 }

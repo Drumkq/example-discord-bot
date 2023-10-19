@@ -19,6 +19,7 @@ export class CreateGuildDto implements IGuild {
   @IsString()
   public readonly guildId: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsBoolean()
   public readonly botInvited: boolean;
@@ -27,6 +28,7 @@ export class CreateGuildDto implements IGuild {
   @IsString()
   public readonly ownerId: string;
 
+  @IsOptional()
   @IsArray()
   public readonly coownerIds?: string[];
 
@@ -38,6 +40,7 @@ export class CreateGuildDto implements IGuild {
   @IsString()
   public readonly name: string;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   @IsDivisibleBy(2)

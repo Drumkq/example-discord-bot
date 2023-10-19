@@ -12,10 +12,4 @@ export class UserController {
   async getGuilds(@CurrentUser() user) {
     return await this.userService.getGuilds(user);
   }
-
-  @Get('is_in_guild')
-  @UseGuards(AuthGuard)
-  async isInGuild(/*guildId: string, ids: string[]*/): Promise<boolean> {
-    return false;
-  }
 }

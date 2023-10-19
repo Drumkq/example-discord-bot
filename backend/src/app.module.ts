@@ -7,6 +7,7 @@ import { UserModel } from './models/user/user.model';
 import { GuildModule } from './guild/guild.module';
 import { GuildModel } from './models/guild/guild.model';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { DiscordModule } from './discord/discord.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     AuthModule,
     UserModule,
     GuildModule,
+    DiscordModule,
   ],
   controllers: [],
   providers: [],

@@ -27,10 +27,10 @@ export class AuthService {
       });
     }
 
-    const differentTokens =
+    const isTokensDifferent =
       user.accessToken === accessToken && user.refreshToken === refreshToken;
 
-    if (differentTokens) {
+    if (isTokensDifferent) {
       user.set('accessToken', accessToken);
       user.set('refreshToken', refreshToken);
       await user.save();

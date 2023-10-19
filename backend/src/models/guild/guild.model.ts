@@ -35,6 +35,7 @@ export class GuildModel extends Model<IGuild> {
 
   @Column({
     type: STRING,
+    defaultValue: '',
     get(): string {
       return this.getDataValue('coownerIds').split(';');
     },
