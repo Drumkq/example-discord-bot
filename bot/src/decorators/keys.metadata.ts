@@ -1,0 +1,7 @@
+export const METADATA_KEYS = {
+  CONTROLLER: Symbol('CONTROLLER'),
+  SERVICE: Symbol('SERVICE'),
+  ON_EVENT: Symbol('ON_EVENT'),
+  ONCE_EVENT: Symbol('ONCE_EVENT'),
+  SLASH_COMMAND: Symbol('SLASH_COMMAND'),
+};
