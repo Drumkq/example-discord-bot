@@ -5,17 +5,16 @@ import { ConfigService } from './config.service';
 import { SlashCommandMetadata } from '../decorators/slashCommands/slashCommand.metadata.interface';
 import { ISlashCommand } from '../decorators/slashCommands/slashCommand.interface';
 
-interface SlashCommandExecutable extends SlashCommandMetadata {
-  target: any;
-}
+export const commandsContext: Array<SlashCommandMetadata> =
+  new Array<SlashCommandMetadata>();
 
 @Service
 export class SlashCommandService implements Bootstrap {
   private readonly rest: REST;
-  private readonly commands: Array<SlashCommandExecutable>;
+  private readonly commands: Array<ISlashCommand>;
 
   constructor(private readonly config: ConfigService) {
-    this.commands = new Array<SlashCommandExecutable>();
+    this.commands = new Array<ISlashCommand>();
     this.rest = new REST({ version: '10' }).setToken(
       config.get<string>('CLIENT_SECRET'),
     );
@@ -44,16 +43,21 @@ export class SlashCommandService implements Bootstrap {
   public addCommand(command: SlashCommandMetadata, target: any) {
     this.commands.push({
       name: command.name,
-      key: command.key,
       description: command.description,
+    });
+
+    commandsContext.push({
+      key: command.key,
+      name: command.name,
       target: target,
+      description: command.description,
     });
   }
 
   public async responseOnInteraction(interaction: CommandInteraction) {
     if (!interaction.isChatInputCommand()) return;
 
-    this.commands.forEach(async (command) => {
+    commandsContext.forEach(async (command) => {
       if (interaction.commandName === command.name) {
         try {
           await command.target[command.key](interaction);

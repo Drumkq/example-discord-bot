@@ -8,6 +8,7 @@ export function SlashCommand(context: ISlashCommand) {
       name: context.name || propertyKey,
       description: context.description || '',
       key: propertyKey,
+      target: null, // Decorator accepts only class method, can't get target instance
     };
 
     let metadataList: Array<SlashCommandMetadata> = [];

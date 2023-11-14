@@ -5,10 +5,11 @@ import { SlashCommandService } from '../services/slashCommand.service';
 
 @Controller
 export class UserHelpController {
-  //constructor(private readonly slashCommand: SlashCommandService) {}
+  constructor(private readonly slashCommand: SlashCommandService) {}
 
   @SlashCommand({ description: 'Help' })
   async help(interaction: CommandInteraction) {
+    console.log(this.slashCommand.getAllCommandsInfo());
     await interaction.reply('Hello!');
   }
 }
