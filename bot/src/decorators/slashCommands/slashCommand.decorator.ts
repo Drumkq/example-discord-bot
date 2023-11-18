@@ -1,18 +1,16 @@
-import { SlashCommandBuilder } from 'discord.js';
 import { METADATA_KEYS } from '../keys.metadata';
-import { ISlashCommand } from './slashCommand.interface';
+import { SlashCommandContext } from './SlashCommand.context';
 import { SlashCommandMetadata } from './slashCommand.metadata.interface';
 import { getMethodMetadata } from '../../utils/reflect';
 
-export function SlashCommand(context: ISlashCommand) {
+export function SlashCommand(context: SlashCommandContext) {
   return function (target: any, propertyKey: string) {
     const metadata: SlashCommandMetadata = {
-      description: context.description || '',
-      builder: new SlashCommandBuilder(),
-      name: context.name || propertyKey,
-      options: context.options || [],
+      description: context.description,
+      options: context.options,
+      name: context.name,
       key: propertyKey,
-      target: null, // We passing `null`, because can't get target instance here
+      target: null, // Pass null target, because decorator hasn't access to the instance of the class
     };
 
     let metadataList: Array<SlashCommandMetadata> = [];

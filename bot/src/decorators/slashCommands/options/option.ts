@@ -1,4 +1,16 @@
-import { SlashCommandBuilder } from 'discord.js';
+import {
+  ApplicationCommandOptionBase,
+  SlashCommandAttachmentOption,
+  SlashCommandBooleanOption,
+  SlashCommandBuilder,
+  SlashCommandChannelOption,
+  SlashCommandIntegerOption,
+  SlashCommandMentionableOption,
+  SlashCommandNumberOption,
+  SlashCommandRoleOption,
+  SlashCommandStringOption,
+  SlashCommandUserOption,
+} from 'discord.js';
 import { ISlashCommandOption } from './slashCommandOption.interface';
 
 export abstract class Option implements ISlashCommandOption {
@@ -8,7 +20,26 @@ export abstract class Option implements ISlashCommandOption {
     public readonly required: boolean,
   ) {}
 
-  abstract build(
+  public abstract build(
     builder: SlashCommandBuilder,
   ): Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>;
+
+  protected setupGeneralInformation<
+    T extends
+      | SlashCommandRoleOption
+      | SlashCommandUserOption
+      | SlashCommandNumberOption
+      | SlashCommandStringOption
+      | SlashCommandBooleanOption
+      | SlashCommandChannelOption
+      | SlashCommandIntegerOption
+      | SlashCommandAttachmentOption
+      | SlashCommandMentionableOption
+      | ApplicationCommandOptionBase,
+  >(builder: ApplicationCommandOptionBase): T {
+    return builder
+      .setName(this.name)
+      .setDescription(this.description)
+      .setRequired(this.required) as T;
+  }
 }

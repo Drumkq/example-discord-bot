@@ -1,8 +1,6 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { ISlashCommand } from './slashCommand.interface';
+import { SlashCommandContext } from './SlashCommand.context';
 
-export interface SlashCommandMetadata extends ISlashCommand {
+export type SlashCommandMetadata = {
   key: string;
   target: any;
-  builder: SlashCommandBuilder;
-}
+} & SlashCommandContext;

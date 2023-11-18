@@ -1,7 +1,11 @@
-import { ISlashCommandOption } from './options/slashCommandOption.interface';
+import {
+  CommandInteraction,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+} from 'discord.js';
+import { SlashCommandContext } from './SlashCommand.context';
 
-export interface ISlashCommand {
-  name?: string;
-  description: string;
-  options?: ISlashCommandOption[];
+export interface ISlashCommand extends SlashCommandContext {
+  build: () => void;
+  getData: () => RESTPostAPIChatInputApplicationCommandsJSONBody;
+  call: (interaction: CommandInteraction) => void;
 }

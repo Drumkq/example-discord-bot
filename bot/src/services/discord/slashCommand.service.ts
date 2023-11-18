@@ -2,11 +2,10 @@ import { CommandInteraction, REST, Routes } from 'discord.js';
 import { Service } from '../../decorators/service.decorator';
 import { Bootstrap } from '../bootstrap.interface';
 import { ConfigService } from '../config.service';
-import { SlashCommandMetadata } from '../../decorators/slashCommands/slashCommand.metadata.interface';
 import { ISlashCommand } from '../../decorators/slashCommands/slashCommand.interface';
+import { SlashCommand } from '../../decorators/slashCommands/SlashCommand';
 
-export const commandsContext: Array<SlashCommandMetadata> =
-  new Array<SlashCommandMetadata>();
+export const commandsContext = new Array<SlashCommand>();
 
 @Service
 export class SlashCommandService implements Bootstrap {
@@ -19,7 +18,7 @@ export class SlashCommandService implements Bootstrap {
   }
 
   async initialize(): Promise<void> {
-    const commands = commandsContext.map((v) => v.builder.toJSON());
+    const commands = commandsContext.map((v) => v.getData());
 
     if (commands.length === 0) {
       console.error('Failed to initialize slash commands: body is undefined');
@@ -40,7 +39,7 @@ export class SlashCommandService implements Bootstrap {
 
   cleanup(): void {}
 
-  public addCommand(command: SlashCommandMetadata) {
+  public addCommand(command: SlashCommand) {
     commandsContext.push(command);
   }
 
@@ -50,7 +49,7 @@ export class SlashCommandService implements Bootstrap {
     commandsContext.forEach(async (command) => {
       if (interaction.commandName === command.name) {
         try {
-          await command.target[command.key](interaction);
+          await command.call(interaction);
         } catch (e) {
           console.error(e);
         }

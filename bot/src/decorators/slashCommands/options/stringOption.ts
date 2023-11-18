@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, SlashCommandStringOption } from 'discord.js';
 import { Option } from './option';
 
 export class StringOption extends Option {
@@ -14,10 +14,7 @@ export class StringOption extends Option {
 
   build(builder: SlashCommandBuilder) {
     return builder.addStringOption((opt) =>
-      opt
-        .setName(this.name)
-        .setDescription(this.description)
-        .setRequired(this.required)
+      this.setupGeneralInformation<SlashCommandStringOption>(opt)
         .setMinLength(this.minLength || 0)
         .setMaxLength(this.maxLength || 6000),
     );

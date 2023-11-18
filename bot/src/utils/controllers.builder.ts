@@ -7,6 +7,7 @@ import { ClassMetadata } from '../decorators/class.metadata.interface';
 import { EventMetadata } from '../decorators/events/event.metadata.interface';
 import { SlashCommandMetadata } from '../decorators/slashCommands/slashCommand.metadata.interface';
 import { SlashCommandService } from '../services/discord/slashCommand.service';
+import { SlashCommand } from '../decorators/slashCommands/SlashCommand';
 
 export class ControllersBuilder {
   constructor(
@@ -57,10 +58,8 @@ export class ControllersBuilder {
     });
   }
 
-  private registerSlashCommands(
-    controllers: Array<any>,
-  ): SlashCommandMetadata[] {
-    const commands = Array<SlashCommandMetadata>();
+  private registerSlashCommands(controllers: Array<any>): SlashCommand[] {
+    const commands = Array<SlashCommand>();
 
     controllers.forEach((controller) => {
       getMethodMetadata<SlashCommandMetadata>(
@@ -73,23 +72,17 @@ export class ControllersBuilder {
           does not have access to an instance of the class
         */
         slashCommand.target = controller;
-        this.slashCommands.addCommand(slashCommand);
-        commands.push(slashCommand);
+
+        const command = new SlashCommand(slashCommand);
+        this.slashCommands.addCommand(command);
+        commands.push(command);
       });
     });
 
     return commands;
   }
 
-  private buildSlashCommands(slashCommands: SlashCommandMetadata[]) {
-    slashCommands.forEach((cmd) => {
-      // Setup command information
-      cmd.builder.setName(cmd.name || cmd.key).setDescription(cmd.description);
-
-      // Setup command's options
-      cmd.options?.forEach((option) => {
-        option.build(cmd.builder);
-      });
-    });
+  private buildSlashCommands(slashCommands: SlashCommand[]) {
+    slashCommands.forEach((cmd) => cmd.build());
   }
 }
