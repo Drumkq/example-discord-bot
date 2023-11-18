@@ -1,7 +1,7 @@
 import { CommandInteraction } from 'discord.js';
 import { Controller } from '../decorators/controller.decorator';
 import { On } from '../decorators/events/on.decorator';
-import { SlashCommandService } from '../services/slashCommand.service';
+import { SlashCommandService } from '../services/discord/slashCommand.service';
 
 @Controller
 export class SlashCommandController {

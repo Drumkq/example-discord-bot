@@ -1,3 +1,4 @@
+import { SlashCommandBuilder } from 'discord.js';
 import { METADATA_KEYS } from '../keys.metadata';
 import { ISlashCommand } from './slashCommand.interface';
 import { SlashCommandMetadata } from './slashCommand.metadata.interface';
@@ -7,8 +8,10 @@ export function SlashCommand(context: ISlashCommand) {
     const metadata: SlashCommandMetadata = {
       name: context.name || propertyKey,
       description: context.description || '',
+      options: context.options || [],
       key: propertyKey,
       target: null, // Decorator accepts only class method, can't get target instance
+      builder: new SlashCommandBuilder(),
     };
 
     let metadataList: Array<SlashCommandMetadata> = [];

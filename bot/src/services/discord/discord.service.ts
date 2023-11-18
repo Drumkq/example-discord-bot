@@ -1,17 +1,13 @@
 import { Client } from 'discord.js';
-import { Bootstrap } from './bootstrap.interface';
-import { Service } from '../decorators/service.decorator';
-
-import dotenv from 'dotenv';
-import { ConfigService } from './config.service';
-import { inject } from 'inversify';
-dotenv.config();
+import { Bootstrap } from '../bootstrap.interface';
+import { Service } from '../../decorators/service.decorator';
+import { ConfigService } from '../config.service';
 
 @Service
 export class DiscordService implements Bootstrap {
   public readonly client: Client;
 
-  constructor(@inject(ConfigService) private readonly config: ConfigService) {
+  constructor(private readonly config: ConfigService) {
     this.client = new Client({ intents: ['Guilds'] });
   }
 

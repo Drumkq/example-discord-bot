@@ -1,9 +1,14 @@
-import { CommandInteraction, REST, Routes } from 'discord.js';
-import { Service } from '../decorators/service.decorator';
-import { Bootstrap } from './bootstrap.interface';
-import { ConfigService } from './config.service';
-import { SlashCommandMetadata } from '../decorators/slashCommands/slashCommand.metadata.interface';
-import { ISlashCommand } from '../decorators/slashCommands/slashCommand.interface';
+import {
+  CommandInteraction,
+  REST,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Routes,
+} from 'discord.js';
+import { Service } from '../../decorators/service.decorator';
+import { Bootstrap } from '../bootstrap.interface';
+import { ConfigService } from '../config.service';
+import { SlashCommandMetadata } from '../../decorators/slashCommands/slashCommand.metadata.interface';
+import { ISlashCommand } from '../../decorators/slashCommands/slashCommand.interface';
 
 export const commandsContext: Array<SlashCommandMetadata> =
   new Array<SlashCommandMetadata>();
@@ -11,28 +16,28 @@ export const commandsContext: Array<SlashCommandMetadata> =
 @Service
 export class SlashCommandService implements Bootstrap {
   private readonly rest: REST;
-  private readonly commands: Array<ISlashCommand>;
 
   constructor(private readonly config: ConfigService) {
-    this.commands = new Array<ISlashCommand>();
     this.rest = new REST({ version: '10' }).setToken(
       config.get<string>('CLIENT_SECRET'),
     );
   }
 
   async initialize(): Promise<void> {
-    if (this.commands.length === 0) {
+    if (commandsContext.length === 0) {
       console.error('Failed to initialize slash commands: body is undefined');
       return;
     }
 
     try {
+      const commands = this.buildCommands(commandsContext);
+
       await this.rest.put(
         Routes.applicationCommands(this.config.get<string>('CLIENT_ID')),
-        { body: this.commands as ISlashCommand },
+        { body: commands },
       );
 
-      console.log(`${this.commands.length} commands added`);
+      console.log(`${commands.length} commands added`);
     } catch (e) {
       console.error(e);
     }
@@ -40,17 +45,31 @@ export class SlashCommandService implements Bootstrap {
 
   cleanup(): void {}
 
-  public addCommand(command: SlashCommandMetadata, target: any) {
-    this.commands.push({
-      name: command.name,
-      description: command.description,
+  private buildCommands(
+    commands: SlashCommandMetadata[],
+  ): Array<RESTPostAPIChatInputApplicationCommandsJSONBody> {
+    const cmds = Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
+
+    commands.forEach((cmd) => {
+      cmd.builder.setName(cmd.name ?? cmd.key).setDescription(cmd.description);
+      cmd.options?.forEach((option) => {
+        option.build(cmd.builder);
+      });
+
+      cmds.push(cmd.builder.toJSON());
     });
 
+    return cmds;
+  }
+
+  public addCommand(command: SlashCommandMetadata, target: any) {
     commandsContext.push({
       key: command.key,
       name: command.name,
       target: target,
       description: command.description,
+      builder: command.builder,
+      options: command.options,
     });
   }
 
@@ -69,10 +88,10 @@ export class SlashCommandService implements Bootstrap {
   }
 
   public getAllCommandsInfo(): Array<ISlashCommand> {
-    return this.commands;
+    return commandsContext;
   }
 
   public getCommandInfo(name: string): ISlashCommand | undefined {
-    return this.commands.find((v) => v.name === name);
+    return commandsContext.find((v) => v.name === name);
   }
 }

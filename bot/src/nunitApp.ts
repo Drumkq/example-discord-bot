@@ -1,8 +1,8 @@
 import { Container } from 'inversify';
 import { ControllersBuilder } from './utils/controllers.builder';
 import { ServicesBuilder } from './utils/services.builder';
-import { DiscordService } from './services/discord.service';
-import { SlashCommandService } from './services/slashCommand.service';
+import { DiscordService } from './services/discord/discord.service';
+import { SlashCommandService } from './services/discord/slashCommand.service';
 
 export const container: Container = new Container({
   autoBindInjectable: true,

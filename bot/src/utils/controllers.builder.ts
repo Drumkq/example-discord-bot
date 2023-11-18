@@ -1,12 +1,12 @@
 import { Container } from 'inversify';
-import { DiscordService } from '../services/discord.service';
+import { DiscordService } from '../services/discord/discord.service';
 import { getClassMetadata, getMethodMetadata } from './reflect';
 import { METADATA_KEYS } from '../decorators/keys.metadata';
 import { ControllerSymbol } from '../controllers';
 import { ClassMetadata } from '../decorators/class.metadata.interface';
 import { EventMetadata } from '../decorators/events/event.metadata.interface';
 import { SlashCommandMetadata } from '../decorators/slashCommands/slashCommand.metadata.interface';
-import { SlashCommandService } from '../services/slashCommand.service';
+import { SlashCommandService } from '../services/discord/slashCommand.service';
 
 export class ControllersBuilder {
   constructor(

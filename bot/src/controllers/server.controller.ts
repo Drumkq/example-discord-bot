@@ -1,7 +1,7 @@
 import { ActivityType } from 'discord.js';
 import { Controller } from '../decorators/controller.decorator';
 import { Once } from '../decorators/events/once.decorator';
-import { DiscordService } from '../services/discord.service';
+import { DiscordService } from '../services/discord/discord.service';
 import { inject } from 'inversify';
 
 @Controller

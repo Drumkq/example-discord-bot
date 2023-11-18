@@ -1,5 +1,6 @@
-import './discord.service';
+import './discord/discord.service';
 import './config.service';
-import './slashCommand.service';
+import './discord/slashCommand.service';
+import './Backend/backend.service';
 
 export const ServiceSymbol = Symbol('Service');
