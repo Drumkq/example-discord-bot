@@ -2,16 +2,17 @@ import { SlashCommandBuilder } from 'discord.js';
 import { METADATA_KEYS } from '../keys.metadata';
 import { ISlashCommand } from './slashCommand.interface';
 import { SlashCommandMetadata } from './slashCommand.metadata.interface';
+import { getMethodMetadata } from '../../utils/reflect';
 
 export function SlashCommand(context: ISlashCommand) {
   return function (target: any, propertyKey: string) {
     const metadata: SlashCommandMetadata = {
-      name: context.name || propertyKey,
       description: context.description || '',
+      builder: new SlashCommandBuilder(),
+      name: context.name || propertyKey,
       options: context.options || [],
       key: propertyKey,
-      target: null, // Decorator accepts only class method, can't get target instance
-      builder: new SlashCommandBuilder(),
+      target: null, // We passing `null`, because can't get target instance here
     };
 
     let metadataList: Array<SlashCommandMetadata> = [];
@@ -24,10 +25,10 @@ export function SlashCommand(context: ISlashCommand) {
         target.constructor,
       );
     } else {
-      metadataList = Reflect.getOwnMetadata(
+      metadataList = getMethodMetadata<SlashCommandMetadata>(
         METADATA_KEYS.SLASH_COMMAND,
-        target.constructor,
-      ) as Array<SlashCommandMetadata>;
+        target,
+      );
     }
 
     metadataList.push(metadata);

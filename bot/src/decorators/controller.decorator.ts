@@ -1,6 +1,7 @@
 import { decorate, injectable } from 'inversify';
 import { METADATA_KEYS } from './keys.metadata';
 import { ClassMetadata } from './class.metadata.interface';
+import { getClassMetadata } from '../utils/reflect';
 
 export function Controller(target: NewableFunction) {
   decorate(injectable(), target);
@@ -10,13 +11,10 @@ export function Controller(target: NewableFunction) {
 
   Reflect.defineMetadata(METADATA_KEYS.CONTROLLER, metadata, target);
 
-  let oldMetadata: Array<ClassMetadata> = Reflect.getMetadata(
+  const oldMetadata = getClassMetadata<ClassMetadata>(
     METADATA_KEYS.CONTROLLER,
     Reflect,
-  ) as Array<ClassMetadata> | [];
-  if (oldMetadata === undefined) {
-    oldMetadata = [];
-  }
+  );
 
   Reflect.defineMetadata(
     METADATA_KEYS.CONTROLLER,

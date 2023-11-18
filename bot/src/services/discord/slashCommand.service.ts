@@ -1,9 +1,4 @@
-import {
-  CommandInteraction,
-  REST,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
-  Routes,
-} from 'discord.js';
+import { CommandInteraction, REST, Routes } from 'discord.js';
 import { Service } from '../../decorators/service.decorator';
 import { Bootstrap } from '../bootstrap.interface';
 import { ConfigService } from '../config.service';
@@ -24,14 +19,14 @@ export class SlashCommandService implements Bootstrap {
   }
 
   async initialize(): Promise<void> {
-    if (commandsContext.length === 0) {
+    const commands = commandsContext.map((v) => v.builder.toJSON());
+
+    if (commands.length === 0) {
       console.error('Failed to initialize slash commands: body is undefined');
       return;
     }
 
     try {
-      const commands = this.buildCommands(commandsContext);
-
       await this.rest.put(
         Routes.applicationCommands(this.config.get<string>('CLIENT_ID')),
         { body: commands },
@@ -45,32 +40,8 @@ export class SlashCommandService implements Bootstrap {
 
   cleanup(): void {}
 
-  private buildCommands(
-    commands: SlashCommandMetadata[],
-  ): Array<RESTPostAPIChatInputApplicationCommandsJSONBody> {
-    const cmds = Array<RESTPostAPIChatInputApplicationCommandsJSONBody>();
-
-    commands.forEach((cmd) => {
-      cmd.builder.setName(cmd.name ?? cmd.key).setDescription(cmd.description);
-      cmd.options?.forEach((option) => {
-        option.build(cmd.builder);
-      });
-
-      cmds.push(cmd.builder.toJSON());
-    });
-
-    return cmds;
-  }
-
-  public addCommand(command: SlashCommandMetadata, target: any) {
-    commandsContext.push({
-      key: command.key,
-      name: command.name,
-      target: target,
-      description: command.description,
-      builder: command.builder,
-      options: command.options,
-    });
+  public addCommand(command: SlashCommandMetadata) {
+    commandsContext.push(command);
   }
 
   public async responseOnInteraction(interaction: CommandInteraction) {

@@ -1,6 +1,7 @@
 import { ClientEvents } from 'discord.js';
 import { EventMetadata } from './event.metadata.interface';
 import { METADATA_KEYS } from '../keys.metadata';
+import { getMethodMetadata } from '../../utils/reflect';
 
 export function On(eventName: keyof ClientEvents) {
   return function (target: any, propertyKey: string) {
@@ -17,10 +18,10 @@ export function On(eventName: keyof ClientEvents) {
         target.constructor,
       );
     } else {
-      metadataList = Reflect.getOwnMetadata(
+      metadataList = getMethodMetadata<EventMetadata>(
         METADATA_KEYS.ON_EVENT,
         target.constructor,
-      ) as Array<EventMetadata>;
+      );
     }
 
     metadataList.push(metadata);

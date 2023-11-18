@@ -27,7 +27,8 @@ export class ControllersBuilder {
 
     const controllers = this.container.getAll<any>(ControllerSymbol);
     this.registerEvents(controllers);
-    this.registerSlashCommands(controllers);
+    const commands = this.registerSlashCommands(controllers);
+    this.buildSlashCommands(commands);
   }
 
   private registerEvents(controllers: Array<any>) {
@@ -56,13 +57,38 @@ export class ControllersBuilder {
     });
   }
 
-  private registerSlashCommands(controllers: Array<any>) {
+  private registerSlashCommands(
+    controllers: Array<any>,
+  ): SlashCommandMetadata[] {
+    const commands = Array<SlashCommandMetadata>();
+
     controllers.forEach((controller) => {
       getMethodMetadata<SlashCommandMetadata>(
         METADATA_KEYS.SLASH_COMMAND,
         controller,
       ).forEach((slashCommand) => {
-        this.slashCommands.addCommand(slashCommand, controller);
+        /*
+          The Target of the command
+          is set to `null` because the decorator
+          does not have access to an instance of the class
+        */
+        slashCommand.target = controller;
+        this.slashCommands.addCommand(slashCommand);
+        commands.push(slashCommand);
+      });
+    });
+
+    return commands;
+  }
+
+  private buildSlashCommands(slashCommands: SlashCommandMetadata[]) {
+    slashCommands.forEach((cmd) => {
+      // Setup command information
+      cmd.builder.setName(cmd.name || cmd.key).setDescription(cmd.description);
+
+      // Setup command's options
+      cmd.options?.forEach((option) => {
+        option.build(cmd.builder);
       });
     });
   }
