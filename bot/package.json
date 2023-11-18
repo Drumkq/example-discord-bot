@@ -13,8 +13,10 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/ffmpeg-static": "^3.0.3",
     "@types/inversify": "^2.0.33",
     "@types/inversify-binding-decorators": "^2.0.0",
+    "@types/inversify-inject-decorators": "^2.0.0",
     "@types/node": "^20.9.0",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
@@ -26,10 +28,16 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.16.1",
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
+    "ffmpeg-static": "^5.2.0",
     "inversify": "^6.0.2",
     "inversify-binding-decorators": "^4.0.0",
+    "inversify-inject-decorators": "^3.1.0",
+    "libsodium-wrappers": "^0.7.13",
+    "play-dl": "^1.9.7",
     "reflect-metadata": "^0.1.13"
   }
 }

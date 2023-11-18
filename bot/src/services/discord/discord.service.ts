@@ -8,7 +8,7 @@ export class DiscordService implements Bootstrap {
   public readonly client: Client;
 
   constructor(private readonly config: ConfigService) {
-    this.client = new Client({ intents: ['Guilds'] });
+    this.client = new Client({ intents: ['Guilds', 'GuildVoiceStates'] });
   }
 
   async initialize(): Promise<void> {

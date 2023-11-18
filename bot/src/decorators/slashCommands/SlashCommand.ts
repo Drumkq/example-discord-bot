@@ -15,7 +15,7 @@ export class SlashCommand implements ISlashCommand {
     this.name = metadata.name || metadata.key;
     this.description = metadata.description;
     this.options = metadata.options || [];
-    this.callback = metadata.target[metadata.key];
+    this.callback = metadata.target[metadata.key].bind(metadata.target);
   }
 
   call(interaction: CommandInteraction) {
