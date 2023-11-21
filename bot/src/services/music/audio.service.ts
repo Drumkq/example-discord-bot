@@ -29,7 +29,7 @@ export class AudioService {
         duration: info.video_details.durationRaw,
         title: info.video_details.title || '',
         icon: info.video_details.thumbnails[0].url,
-        urlToAudio: info.video_details.url,
+        urlToAudio: { type: 'youtube', url: info.video_details.url },
         authorName,
         urlToAuthor,
         authorIcon,

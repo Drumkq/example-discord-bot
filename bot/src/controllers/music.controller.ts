@@ -50,7 +50,7 @@ export class MusicController {
       embeds: [
         buildGeneralResponse(new EmbedBuilder())
           .setTitle(currentAudio.info.title)
-          .setURL(currentAudio.info.urlToAudio)
+          .setURL(currentAudio.info.urlToAudio.url)
           .setAuthor({
             name: currentAudio.info.authorName || '',
             url: currentAudio.info.urlToAuthor,
@@ -113,7 +113,7 @@ export class MusicController {
       embeds: [
         buildGeneralResponse(new EmbedBuilder())
           .setTitle(currentAudio.info.title)
-          .setURL(currentAudio.info.urlToAudio)
+          .setURL(currentAudio.info.urlToAudio.url)
           .setAuthor({
             name: currentAudio.info.authorName || '',
             url: currentAudio.info.urlToAuthor,
@@ -217,6 +217,16 @@ export class MusicController {
     description: 'Clears audio queue',
   })
   async clear(interaction: CommandInteraction) {
-    await interaction.reply('Not yet implemented');
+    await interaction.deferReply();
+
+    this.urls.clear();
+
+    await interaction.editReply({
+      embeds: [
+        buildGeneralResponse(new EmbedBuilder()).setTitle(
+          'The queue has been cleared',
+        ),
+      ],
+    });
   }
 }

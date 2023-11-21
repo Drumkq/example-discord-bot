@@ -19,6 +19,10 @@ export class UrlQueueService {
     return queue!;
   }
 
+  public clear() {
+    this.urlQueue.clear();
+  }
+
   public getUrl(guildId: string, erase: boolean) {
     if (erase) {
       const queue = this.urlQueue.get(guildId);

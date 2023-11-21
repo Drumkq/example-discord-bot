@@ -35,48 +35,50 @@ export class PlayerService {
   ): Promise<
     { currentAudio: AudioInfo; nextAudio: AudioInfo | undefined } | undefined
   > {
-    const audioUrl = this.urls.getUrl(guildId, true);
-    if (!audioUrl) {
-      if (this.nextAudio && force) {
-        if (force) {
-          this.player.play(this.nextAudio.resource);
-          const audio = this.nextAudio;
-          this.nextAudio = undefined;
-          return { currentAudio: audio, nextAudio: undefined };
-        }
-      }
+    const url = !force ? this.urls.getUrl(guildId, true) : undefined;
+    const audio = !force ? await this.audio.createAudio(url!) : undefined;
 
-      return;
-    }
-
-    const audio = await this.audio.createAudio(audioUrl);
-    if (!audio) {
-      throw Error('Audio player supports only youtube urls');
-    }
-
-    if (force || !this._isPlaying) {
+    if (audio && !this.isPlaying) {
       this.player.play(audio.resource);
-    }
+      if (this.isRepeat) {
+        this.urls.addUrl(guildId, url!);
 
-    if (!this.nextAudio) {
-      const nextUrl = this.urls.getUrl(guildId, true);
-      if (nextUrl) {
-        this.nextAudio = await this.audio.createAudio(nextUrl);
-      } else {
-        if (!force && this._isPlaying) {
-          this.nextAudio = audio;
-        }
+        const nextUrl = this.urls.getUrl(guildId, true);
+        this.nextAudio = nextUrl
+          ? await this.audio.createAudio(nextUrl)
+          : undefined;
       }
+
+      return { currentAudio: audio, nextAudio: this.nextAudio };
     }
 
-    if (this.isRepeat || this.nextAudio) {
-      this.urls.addUrl(guildId, audioUrl);
+    if (force && this.nextAudio) {
+      const playingAudio = this.nextAudio;
+      this.player.play(playingAudio.resource);
+      if (this.isRepeat) {
+        this.urls.addUrl(guildId, playingAudio.info.urlToAudio);
+      }
+
+      const nextUrl = this.urls.getUrl(guildId, true);
+      this.nextAudio = nextUrl
+        ? await this.audio.createAudio(nextUrl)
+        : undefined;
+
+      return {
+        currentAudio: playingAudio,
+        nextAudio: this.nextAudio,
+      };
     }
 
-    return {
-      currentAudio: audio,
-      nextAudio: this.nextAudio,
-    };
+    if (audio && this.isPlaying) {
+      if (!this.nextAudio) {
+        this.nextAudio = audio;
+      } else {
+        this.urls.addUrl(guildId, url!);
+      }
+
+      return { currentAudio: audio, nextAudio: this.nextAudio };
+    }
   }
 
   public pause() {
@@ -91,6 +93,7 @@ export class PlayerService {
     if (this.player.stop()) {
       this._isPlaying = false;
       this.isPaused = false;
+      this.urls.clear();
     }
   }
 

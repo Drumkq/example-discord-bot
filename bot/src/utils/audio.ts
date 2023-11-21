@@ -14,7 +14,7 @@ export type AudioInfo = {
 
     readonly title: string;
     readonly icon: string;
-    readonly urlToAudio: string;
+    readonly urlToAudio: AudioUrlInfo;
 
     readonly authorName?: string;
     readonly authorIcon?: string;
