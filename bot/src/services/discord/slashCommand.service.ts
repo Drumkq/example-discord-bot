@@ -1,4 +1,4 @@
-import { CommandInteraction, REST, Routes } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, REST, Routes } from 'discord.js';
 import { Service } from '../../decorators/service.decorator';
 import { Bootstrap } from '../bootstrap.interface';
 import { ConfigService } from '../config.service';
@@ -50,7 +50,18 @@ export class SlashCommandService implements Bootstrap {
       if (interaction.commandName === command.name) {
         try {
           await command.call(interaction);
-        } catch (e) {
+        } catch (e: any) {
+          if (interaction.deferred) {
+            await interaction.editReply({
+              embeds: [
+                new EmbedBuilder()
+                  .setColor('Red')
+                  .setTitle('Exception')
+                  .setDescription(e.message),
+              ],
+            });
+          }
+
           console.error(e);
         }
       }

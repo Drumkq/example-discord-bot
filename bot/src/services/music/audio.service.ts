@@ -1,60 +1,41 @@
-import {
-  AudioPlayer,
-  createAudioPlayer,
-  createAudioResource,
-} from '@discordjs/voice';
+import { createAudioResource } from '@discordjs/voice';
 import { Service } from '../../decorators/service.decorator';
-import play from 'play-dl';
-import { ConfigService } from '../config.service';
+import { AudioInfo, AudioUrlInfo } from '../../utils/audio';
+import * as dl from 'play-dl';
 
 @Service
 export class AudioService {
-  public readonly player: AudioPlayer;
-
-  public repeat: boolean = false;
-  public connected: boolean = false;
-
-  private readonly audioUrls = new Array<string>();
-
-  constructor(private readonly config: ConfigService) {
-    this.player = createAudioPlayer();
-    play.setToken({
-      youtube: {
-        cookie: this.config.get<string>('YT_COOCKIE'),
-      },
-    });
-  }
-
-  public clearQueue() {
-    this.audioUrls.length = 0;
-  }
-
-  public async addSong(url: string) {
-    this.audioUrls.push(url);
-  }
-
-  public async getCurrentSong() {
-    if (this.repeat) {
-      const url = this.audioUrls.shift();
-      if (url) {
-        this.audioUrls.push(url);
-        return await this.createSong(url);
-      }
-
+  public async createAudio(url: AudioUrlInfo): Promise<AudioInfo | undefined> {
+    // Only for youtube
+    if (url.type !== 'youtube') {
       return undefined;
-    } else {
-      const url = this.audioUrls.shift();
-      if (url) {
-        return this.createSong(url);
-      }
     }
-  }
 
-  private async createSong(url: string) {
-    const stream = await play.stream(url, {
-      discordPlayerCompatibility: true,
-    });
+    const [info, stream] = await Promise.all([
+      dl.video_basic_info(url.url),
+      dl.stream(url.url, { discordPlayerCompatibility: true }),
+    ]);
 
-    return createAudioResource(stream.stream, { inputType: stream.type });
+    const audioData = info.video_details;
+    const channel = audioData.channel;
+
+    const authorName = channel?.name;
+    const urlToAuthor = channel?.url;
+    const authorIcon = channel?.icons?.at(0)?.url;
+
+    return {
+      resource: createAudioResource(stream.stream, { inputType: stream.type }),
+      info: {
+        duration: info.video_details.durationRaw,
+        title: info.video_details.title || '',
+        icon: info.video_details.thumbnails[0].url,
+        urlToAudio: info.video_details.url,
+        authorName,
+        urlToAuthor,
+        authorIcon,
+        views: info.video_details.views,
+        likes: info.video_details.likes,
+      },
+    };
   }
 }

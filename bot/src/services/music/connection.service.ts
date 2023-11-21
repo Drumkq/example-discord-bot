@@ -6,15 +6,13 @@ import {
   joinVoiceChannel,
 } from '@discordjs/voice';
 import { Service } from '../../decorators/service.decorator';
-import { AudioService } from './audio.service';
+import { PlayerService } from './player.service';
 
 @Service
 export class ConnectionService {
   public voiceConnection?: VoiceConnection;
 
-  constructor(private readonly player: AudioService) {}
-
-  private connected: boolean = false;
+  constructor(private readonly player: PlayerService) {}
 
   public join(
     options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions,
@@ -26,21 +24,6 @@ export class ConnectionService {
     if (!this.voiceConnection) {
       this.voiceConnection = joinVoiceChannel(options);
       this.voiceConnection.subscribe(this.player.player);
-
-      this.voiceConnection.on('stateChange', (oldState, newState) => {
-        if (newState.status === VoiceConnectionStatus.Disconnected) {
-          this.player.clearQueue();
-          this.player.player.stop(true);
-          this.player.connected = false;
-        }
-
-        if (
-          newState.status === VoiceConnectionStatus.Ready ||
-          newState.status === VoiceConnectionStatus.Signalling
-        ) {
-          this.player.connected = true;
-        }
-      });
     } else {
       this.voiceConnection.rejoin({
         channelId: options.channelId,
@@ -58,9 +41,5 @@ export class ConnectionService {
     }
 
     return this.voiceConnection.disconnect(); // After disconnect can't play tracks
-  }
-
-  public isConnected(): boolean {
-    return this.connected;
   }
 }

@@ -17,6 +17,7 @@
     "@types/inversify": "^2.0.33",
     "@types/inversify-binding-decorators": "^2.0.0",
     "@types/inversify-inject-decorators": "^2.0.0",
+    "@types/lodash": "^4.14.201",
     "@types/node": "^20.9.0",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
@@ -37,6 +38,7 @@
     "inversify-binding-decorators": "^4.0.0",
     "inversify-inject-decorators": "^3.1.0",
     "libsodium-wrappers": "^0.7.13",
+    "lodash": "^4.17.21",
     "play-dl": "^1.9.7",
     "reflect-metadata": "^0.1.13"
   }
