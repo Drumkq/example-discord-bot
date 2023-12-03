@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { IUser } from './user.interface';
 
-export class CreateUserDto implements IUser {
+export class CreateUserDto {
   @IsOptional()
   @IsNumber()
   public readonly id: number;

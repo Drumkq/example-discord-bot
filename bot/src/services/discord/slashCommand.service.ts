@@ -2,8 +2,9 @@ import { CommandInteraction, EmbedBuilder, REST, Routes } from 'discord.js';
 import { Service } from '../../decorators/service.decorator';
 import { Bootstrap } from '../bootstrap.interface';
 import { ConfigService } from '../config.service';
-import { ISlashCommand } from '../../decorators/slashCommands/slashCommand.interface';
 import { SlashCommand } from '../../decorators/slashCommands/SlashCommand';
+import { SlashCommandCooldownService } from './slashCommandCooldown.service';
+import { buildGeneralResponse } from '../../utils/interaction.responses';
 
 export const commandsContext = new Array<SlashCommand>();
 
@@ -11,7 +12,10 @@ export const commandsContext = new Array<SlashCommand>();
 export class SlashCommandService implements Bootstrap {
   private readonly rest: REST;
 
-  constructor(private readonly config: ConfigService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly cooldowns: SlashCommandCooldownService,
+  ) {
     this.rest = new REST({ version: '10' }).setToken(
       config.get<string>('CLIENT_SECRET'),
     );
@@ -47,9 +51,49 @@ export class SlashCommandService implements Bootstrap {
     if (!interaction.isChatInputCommand()) return;
 
     commandsContext.forEach(async (command) => {
-      if (interaction.commandName === command.name) {
+      if (interaction.commandName === command.context.name) {
+        await interaction.deferReply();
+
         try {
-          await command.call(interaction);
+          const elapsedSeconds = this.cooldowns.getElapsedSeconds(
+            interaction.user.id,
+            interaction.commandName,
+          );
+
+          if (!command.context.cooldown) {
+            await command.call(interaction);
+            return;
+          }
+
+          if (!elapsedSeconds) {
+            await command.call(interaction);
+            this.cooldowns.updateCooldown(
+              interaction.user.id,
+              interaction.commandName,
+            );
+
+            return;
+          }
+
+          if (elapsedSeconds > command.context.cooldown) {
+            await command.call(interaction);
+            this.cooldowns.updateCooldown(
+              interaction.user.id,
+              interaction.commandName,
+            );
+          } else {
+            await interaction.editReply({
+              embeds: [
+                buildGeneralResponse(new EmbedBuilder())
+                  .setTitle('Command on cooldown')
+                  .setDescription(
+                    `${new Date(
+                      command.context.cooldown - elapsedSeconds,
+                    ).getSeconds()} seconds left`,
+                  ),
+              ],
+            });
+          }
         } catch (e: any) {
           if (interaction.deferred) {
             await interaction.editReply({
@@ -61,18 +105,16 @@ export class SlashCommandService implements Bootstrap {
               ],
             });
           }
-
-          console.error(e);
         }
       }
     });
   }
 
-  public getAllCommandsInfo(): Array<ISlashCommand> {
+  public getAllCommandsInfo(): Array<SlashCommand> {
     return commandsContext;
   }
 
-  public getCommandInfo(name: string): ISlashCommand | undefined {
-    return commandsContext.find((v) => v.name === name);
+  public getCommandInfo(name: string): SlashCommand | undefined {
+    return commandsContext.find((v) => v.context.name === name);
   }
 }

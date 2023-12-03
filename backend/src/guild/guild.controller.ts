@@ -7,15 +7,15 @@ import { IGuild } from 'src/models/guild/guild.interface';
 export class GuildController {
   constructor(private readonly guildService: GuildService) {}
 
-  @Put('join')
+  @Put('join/:guildId')
   @UseGuards(ApiKeyGuard)
-  async joinEvent(@Body() guildId: string) {
+  async joinEvent(@Param('guildId') guildId) {
     return await this.guildService.botJoinedGuild(guildId);
   }
 
-  @Put('leave')
+  @Put('leave/:guildId')
   @UseGuards(ApiKeyGuard)
-  async leaveEvent(@Body() guildId: string) {
+  async leaveEvent(@Param('guildId') guildId) {
     return await this.guildService.botLeavedGuild(guildId);
   }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { DiscordService } from 'src/discord/discord.service';
-import { CreateUserDto } from 'src/models/user/createUser.dto';
+import { CreateUserDto } from 'src/models/user/user.dto';
 import { IUser } from 'src/models/user/user.interface';
 import { UserModel } from 'src/models/user/user.model';
 

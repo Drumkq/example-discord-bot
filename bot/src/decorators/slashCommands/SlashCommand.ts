@@ -1,34 +1,34 @@
-import { CommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { ISlashCommand } from './slashCommand.interface';
-import { ISlashCommandOption } from './options/slashCommandOption.interface';
+import {
+  CommandInteraction,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { SlashCommandMetadata } from './slashCommand.metadata.interface';
+import { SlashCommandContext } from './SlashCommand.context';
 
-export class SlashCommand implements ISlashCommand {
-  public readonly name: string;
-  public readonly description: string;
-  public readonly options: ISlashCommandOption[];
-
+export class SlashCommand {
+  public readonly context: SlashCommandContext;
   private readonly callback: (interaction: CommandInteraction) => void;
   private readonly builder = new SlashCommandBuilder();
 
   constructor(metadata: SlashCommandMetadata) {
-    this.name = metadata.name || metadata.key;
-    this.description = metadata.description;
-    this.options = metadata.options || [];
+    this.context = metadata;
     this.callback = metadata.target[metadata.key].bind(metadata.target);
   }
 
-  call(interaction: CommandInteraction) {
-    return this.callback(interaction);
+  public async call(interaction: CommandInteraction): Promise<void> {
+    return await this.callback(interaction);
   }
 
-  getData() {
+  public getData(): RESTPostAPIChatInputApplicationCommandsJSONBody {
     return this.builder.toJSON();
   }
 
-  build() {
-    this.builder.setName(this.name).setDescription(this.description);
-    this.options.forEach((option) => {
+  public build(): void {
+    this.builder
+      .setName(this.context.name!)
+      .setDescription(this.context.description);
+    this.context.options?.forEach((option) => {
       option.build(this.builder);
     });
   }

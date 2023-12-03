@@ -39,9 +39,11 @@ export class ControllersBuilder {
         METADATA_KEYS.ONCE_EVENT,
         controller,
       ).forEach((onceEvent) => {
+        onceEvent.target = controller;
+
         this.discord.client.once(
-          onceEvent.eventName,
-          controller[onceEvent.key].bind(controller),
+          onceEvent.name,
+          controller[onceEvent.key].bind(onceEvent.target),
         );
       });
 
@@ -50,9 +52,11 @@ export class ControllersBuilder {
         METADATA_KEYS.ON_EVENT,
         controller,
       ).forEach((onEvent) => {
+        onEvent.target = controller;
+
         this.discord.client.on(
-          onEvent.eventName,
-          controller[onEvent.key].bind(controller),
+          onEvent.name,
+          controller[onEvent.key].bind(onEvent.target),
         );
       });
     });

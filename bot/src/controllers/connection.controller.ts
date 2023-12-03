@@ -1,7 +1,9 @@
-import { CommandInteraction, GuildMember } from 'discord.js';
+import { CommandInteraction, EmbedBuilder } from 'discord.js';
 import { Controller } from '../decorators/controller.decorator';
 import { SlashCommand } from '../decorators/slashCommands/slashCommand.decorator';
 import { ConnectionService } from '../services/music/connection.service';
+import { InteractionExtension } from '../utils/interaction.extension';
+import { buildGeneralResponse } from '../utils/interaction.responses';
 
 @Controller
 export class ConnectionController {
@@ -9,24 +11,27 @@ export class ConnectionController {
 
   @SlashCommand({ description: 'Leaves from the current voice channel' })
   async leave(interaction: CommandInteraction) {
-    //this.connection.leave();
+    const guild = InteractionExtension.getGuild(interaction);
+    this.connection.leave(guild.id);
 
-    await interaction.reply('On maintenance');
+    await interaction.editReply({
+      embeds: [buildGeneralResponse(new EmbedBuilder()).setTitle('Leaved!')],
+    });
   }
 
   // eslint-disable-next-line quotes
   @SlashCommand({ description: "Joins to member's voice channel" })
   async join(interaction: CommandInteraction) {
-    const guildMember = interaction.member as GuildMember;
-    if (!guildMember) {
-      await interaction.reply('This command only allowed in guilds');
-      return;
-    }
+    const guildMember = InteractionExtension.getGuildMember(interaction);
 
     if (!guildMember.voice.channelId) {
-      await interaction.reply(
-        'Join in voice channel first before use this command',
-      );
+      await interaction.editReply({
+        embeds: [
+          buildGeneralResponse(new EmbedBuilder()).setTitle(
+            'Join in voice channel first before use this command',
+          ),
+        ],
+      });
       return;
     }
 
@@ -37,10 +42,18 @@ export class ConnectionController {
         channelId: guildMember.voice.channelId,
       })
     ) {
-      await interaction.reply('Bot already joined to the channel');
+      await interaction.editReply({
+        embeds: [
+          buildGeneralResponse(new EmbedBuilder()).setTitle(
+            'Bot already joined to the channel',
+          ),
+        ],
+      });
       return;
     }
 
-    await interaction.reply('Joined');
+    await interaction.editReply({
+      embeds: [buildGeneralResponse(new EmbedBuilder()).setTitle('Joined!')],
+    });
   }
 }

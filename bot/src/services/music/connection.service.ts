@@ -1,45 +1,79 @@
 import {
   CreateVoiceConnectionOptions,
   JoinVoiceChannelOptions,
+  PlayerSubscription,
   VoiceConnection,
   VoiceConnectionStatus,
+  getVoiceConnection,
   joinVoiceChannel,
 } from '@discordjs/voice';
 import { Service } from '../../decorators/service.decorator';
-import { PlayerService } from './player.service';
+import { Player } from '../../utils/player';
+import { AudioService } from './audio.service';
 
 @Service
 export class ConnectionService {
-  public voiceConnection?: VoiceConnection;
+  constructor(private readonly audio: AudioService) {}
 
-  constructor(private readonly player: PlayerService) {}
+  public readonly players = new Map<string, Player>();
+  private readonly playerSubscriptions = new Map<string, PlayerSubscription>();
 
   public join(
     options: CreateVoiceConnectionOptions & JoinVoiceChannelOptions,
   ): boolean {
-    if (this.voiceConnection?.state.status === VoiceConnectionStatus.Ready) {
+    let voiceConnection = getVoiceConnection(options.guildId);
+    if (voiceConnection?.state.status === VoiceConnectionStatus.Ready) {
       return false;
     }
 
-    if (!this.voiceConnection) {
-      this.voiceConnection = joinVoiceChannel(options);
-      this.voiceConnection.subscribe(this.player.player);
+    if (!voiceConnection) {
+      voiceConnection = joinVoiceChannel(options);
+
+      const player = this.players.get(options.guildId);
+      if (player) {
+        this.subscribe(voiceConnection, player, options.guildId);
+      } else {
+        const player = new Player(this.audio);
+        this.players.set(options.guildId, player);
+        this.subscribe(voiceConnection, player, options.guildId);
+      }
     } else {
-      this.voiceConnection.rejoin({
-        channelId: options.channelId,
-        selfMute: false,
-        selfDeaf: false,
-      });
+      voiceConnection = joinVoiceChannel(options);
+      const player = this.players.get(options.guildId);
+      if (player) {
+        player.stop();
+      }
     }
 
     return true;
   }
 
-  public leave(): boolean {
-    if (!this.voiceConnection) {
-      return false;
+  public leave(guildId: string) {
+    const voiceConnection = getVoiceConnection(guildId);
+    if (!voiceConnection) {
+      return;
     }
 
-    return this.voiceConnection.disconnect(); // After disconnect can't play tracks
+    this.unsubscribe(voiceConnection, guildId);
+    voiceConnection.destroy(false);
+  }
+
+  private subscribe(
+    connection: VoiceConnection,
+    player: Player,
+    guildId: string,
+  ) {
+    const subscription = connection.subscribe(player.player);
+    if (subscription) {
+      this.playerSubscriptions.set(guildId, subscription);
+    }
+  }
+
+  private unsubscribe(connection: VoiceConnection, guildId: string) {
+    const subscription = this.playerSubscriptions.get(guildId);
+    if (subscription) {
+      subscription.unsubscribe();
+      this.players.delete(guildId);
+    }
   }
 }

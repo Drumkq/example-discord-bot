@@ -4,22 +4,18 @@ import {
   AudioPlayerStatus,
   createAudioPlayer,
 } from '@discordjs/voice';
-import { Service } from '../../decorators/service.decorator';
-import { AudioService } from './audio.service';
-import { UrlQueueService } from './urlQueue.service';
-import { AudioInfo } from '../../utils/audio';
+import { AudioService } from '../services/music/audio.service';
+import { AudioInfo } from './audio';
+import { UrlQueue } from './urlQueue';
 
-@Service
-export class PlayerService {
-  constructor(
-    private readonly audio: AudioService,
-    private readonly urls: UrlQueueService,
-  ) {
+export class Player {
+  constructor(private readonly audio: AudioService) {
     this.player = createAudioPlayer();
     this.player.on('stateChange', this.onStateChange.bind(this));
   }
 
   public readonly player: AudioPlayer;
+  public readonly urls = new UrlQueue();
   private nextAudio: AudioInfo | undefined;
 
   public isRepeat: boolean = false;
@@ -30,20 +26,19 @@ export class PlayerService {
   private isPaused: boolean = false;
 
   public async play(
-    guildId: string,
     force: boolean,
   ): Promise<
     { currentAudio: AudioInfo; nextAudio: AudioInfo | undefined } | undefined
   > {
-    const url = !force ? this.urls.getUrl(guildId, true) : undefined;
+    const url = !force ? this.urls.getUrl(true) : undefined;
     const audio = !force ? await this.audio.createAudio(url!) : undefined;
 
     if (audio && !this.isPlaying) {
       this.player.play(audio.resource);
       if (this.isRepeat) {
-        this.urls.addUrl(guildId, url!);
+        this.urls.addUrl(url!);
 
-        const nextUrl = this.urls.getUrl(guildId, true);
+        const nextUrl = this.urls.getUrl(true);
         this.nextAudio = nextUrl
           ? await this.audio.createAudio(nextUrl)
           : undefined;
@@ -56,10 +51,10 @@ export class PlayerService {
       const playingAudio = this.nextAudio;
       this.player.play(playingAudio.resource);
       if (this.isRepeat) {
-        this.urls.addUrl(guildId, playingAudio.info.urlToAudio);
+        this.urls.addUrl(playingAudio.info.urlToAudio);
       }
 
-      const nextUrl = this.urls.getUrl(guildId, true);
+      const nextUrl = this.urls.getUrl(true);
       this.nextAudio = nextUrl
         ? await this.audio.createAudio(nextUrl)
         : undefined;
@@ -74,7 +69,7 @@ export class PlayerService {
       if (!this.nextAudio) {
         this.nextAudio = audio;
       } else {
-        this.urls.addUrl(guildId, url!);
+        this.urls.addUrl(url!);
       }
 
       return { currentAudio: audio, nextAudio: this.nextAudio };
@@ -105,6 +100,7 @@ export class PlayerService {
       this._isPlaying = true;
     } else {
       this._isPlaying = false;
+      this.play(true);
     }
   }
 }

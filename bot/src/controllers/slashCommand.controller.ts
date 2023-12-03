@@ -7,7 +7,7 @@ import { SlashCommandService } from '../services/discord/slashCommand.service';
 export class SlashCommandController {
   constructor(private readonly slashCommand: SlashCommandService) {}
 
-  @On('interactionCreate')
+  @On({ name: 'interactionCreate' })
   async onInteractionCreate(interaction: CommandInteraction) {
     await this.slashCommand.responseOnInteraction(interaction);
   }

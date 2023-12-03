@@ -1,7 +1,7 @@
 import { decorate, injectable } from 'inversify';
 import { METADATA_KEYS } from './keys.metadata';
 import { ClassMetadata } from './class.metadata.interface';
-import { getClassMetadata } from '../utils/reflect';
+import { registerClass } from './common/registerClass';
 
 export function Service(target: NewableFunction) {
   decorate(injectable(), target);
@@ -9,16 +9,5 @@ export function Service(target: NewableFunction) {
     target: target,
   };
 
-  Reflect.defineMetadata(METADATA_KEYS.SERVICE, metadata, target);
-
-  const oldMetadata = getClassMetadata<ClassMetadata>(
-    METADATA_KEYS.SERVICE,
-    Reflect,
-  );
-
-  Reflect.defineMetadata(
-    METADATA_KEYS.SERVICE,
-    [metadata, ...oldMetadata],
-    Reflect,
-  );
+  registerClass(target, metadata, METADATA_KEYS.SERVICE);
 }

@@ -1,6 +1,4 @@
-import { ClientEvents } from 'discord.js';
+import { MethodMetadata } from '../common/methodMetadata';
+import { EventContext } from './event.context';
 
-export interface EventMetadata {
-  eventName: keyof ClientEvents;
-  key: string;
-}
+export type EventMetadata = MethodMetadata & EventContext;

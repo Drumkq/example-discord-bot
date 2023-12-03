@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { IUser } from 'src/models/user/user.interface';
+import { IDiscordUser } from './interfaces/discordUser.interface';
 
 @Injectable()
 export class DiscordService {
@@ -14,19 +15,45 @@ export class DiscordService {
   private DISCORD_ROUTE: string;
 
   async getUserGuilds(user: IUser) {
-    return await this.makeRequest<any[]>('users/@me/guilds', 'GET', user);
+    return await this.makeUserRequest<any[]>('users/@me/guilds', 'GET', user);
   }
 
-  private async makeRequest<T = any>(
+  public async getDiscordUser(userId: string): Promise<IDiscordUser> {
+    return await this.makeBotRequest<IDiscordUser>(`users/${userId}`, 'GET');
+  }
+
+  private async makeUserRequest<T>(
     route: string,
     method: 'GET' | 'POST' | 'PATCH',
     user: IUser,
   ): Promise<T> {
-    return (
-      await axios<T>(`${this.DISCORD_ROUTE}/${route}`, {
-        method: method,
-        headers: { Authorization: `Bearer ${user.accessToken}` },
-      })
-    ).data;
+    try {
+      return (
+        await axios<T>(`${this.DISCORD_ROUTE}/${route}`, {
+          method: method,
+          headers: { Authorization: `Bearer ${user.accessToken}` },
+        })
+      ).data;
+    } catch (e) {
+      throw new HttpException(`${e.response.data.message}`, e.response.status);
+    }
+  }
+
+  private async makeBotRequest<T>(
+    route: string,
+    method: 'GET' | 'POST' | 'PATCH',
+  ): Promise<T> {
+    try {
+      return (
+        await axios<T>(`${this.DISCORD_ROUTE}/${route}`, {
+          method: method,
+          headers: {
+            Authorization: `Bot ${this.config.get<string>('CLIENT_SECRET')}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      throw new HttpException(`${e.response.data.message}`, e.response.status);
+    }
   }
 }

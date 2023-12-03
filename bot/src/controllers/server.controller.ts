@@ -1,6 +1,6 @@
-import { ActivityType } from 'discord.js';
 import { Controller } from '../decorators/controller.decorator';
 import { Once } from '../decorators/events/once.decorator';
+import { BackendService } from '../services/Backend/backend.service';
 import { DiscordService } from '../services/discord/discord.service';
 import { inject } from 'inversify';
 
@@ -8,16 +8,11 @@ import { inject } from 'inversify';
 export class ServerController {
   constructor(
     @inject(DiscordService) private readonly discord: DiscordService,
+    private readonly backend: BackendService,
   ) {}
 
-  @Once('ready')
+  @Once({ name: 'ready' })
   public ready() {
     console.log('Bot currently online!');
-
-    this.discord.client.user?.setActivity({
-      type: ActivityType.Listening,
-      name: 'и повинуется вам',
-      state: 'пропишите "/help" и я расскажу обо всём!',
-    });
   }
 }

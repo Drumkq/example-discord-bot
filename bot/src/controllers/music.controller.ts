@@ -4,18 +4,12 @@ import { SlashCommand } from '../decorators/slashCommands/slashCommand.decorator
 import { StringOption } from '../decorators/slashCommands/options/stringOption';
 import { ConnectionService } from '../services/music/connection.service';
 import { InteractionExtension } from '../utils/interaction.extension';
-import { PlayerService } from '../services/music/player.service';
 import { InvalidGuildExecution } from '../exceptions/invalidExecution';
-import { UrlQueueService } from '../services/music/urlQueue.service';
 import { buildGeneralResponse } from '../utils/interaction.responses';
 
 @Controller
 export class MusicController {
-  constructor(
-    private readonly player: PlayerService,
-    private readonly urls: UrlQueueService,
-    private readonly connection: ConnectionService,
-  ) {}
+  constructor(private readonly connection: ConnectionService) {}
 
   @SlashCommand({
     description: 'Adds a new song to the guild queue',
@@ -30,16 +24,19 @@ export class MusicController {
       throw Error('You have to join the voice channel first');
     }
 
-    await interaction.deferReply();
-
     this.connection.join({
       adapterCreator: member.guild.voiceAdapterCreator,
       guildId: member.guild.id,
       channelId: member.voice.channel.id,
     });
 
-    this.urls.addUrl(member.guild.id, { type: 'youtube', url: url });
-    const audios = await this.player.play(member.guild.id, false);
+    const player = this.connection.players.get(member.guild.id);
+    if (!player) {
+      return;
+    }
+
+    player.urls.addUrl({ type: 'youtube', url: url });
+    const audios = await player.play(false);
     if (audios === undefined) {
       interaction.editReply('No audio to play');
       return;
@@ -90,11 +87,14 @@ export class MusicController {
       throw new InvalidGuildExecution();
     }
 
-    await interaction.deferReply();
+    const player = this.connection.players.get(interaction.guildId);
+    if (!player) {
+      return;
+    }
 
-    const audios = await this.player.play(interaction.guildId, true);
+    const audios = await player.play(true);
     if (!audios) {
-      this.player.stop();
+      player.stop();
 
       await interaction.editReply({
         embeds: [
@@ -149,14 +149,27 @@ export class MusicController {
 
   @SlashCommand({ description: 'Enables loop' })
   async repeat(interaction: CommandInteraction) {
-    await interaction.deferReply();
+    const player = this.connection.players.get(
+      InteractionExtension.getGuild(interaction).id,
+    );
+    if (!player) {
+      await interaction.editReply({
+        embeds: [
+          buildGeneralResponse(new EmbedBuilder()).setTitle(
+            'Bot is not in the voice channel',
+          ),
+        ],
+      });
 
-    this.player.isRepeat = !this.player.isRepeat;
+      return;
+    }
+
+    player.isRepeat = !player.isRepeat;
 
     await interaction.editReply({
       embeds: [
         buildGeneralResponse(new EmbedBuilder()).setTitle(
-          this.player.isRepeat ? 'Repeat enabled' : 'Repeat disabled',
+          player.isRepeat ? 'Repeat enabled' : 'Repeat disabled',
         ),
       ],
     });
@@ -166,9 +179,14 @@ export class MusicController {
     description: 'Stops audio player and clears the guild queue',
   })
   async stop(interaction: CommandInteraction) {
-    await interaction.deferReply();
+    const player = this.connection.players.get(
+      InteractionExtension.getGuild(interaction).id,
+    );
+    if (!player) {
+      return;
+    }
 
-    if (!this.player.isPlaying) {
+    if (!player.isPlaying) {
       await interaction.editReply({
         embeds: [
           buildGeneralResponse(new EmbedBuilder()).setTitle('No audio to skip'),
@@ -178,7 +196,7 @@ export class MusicController {
       return;
     }
 
-    this.player.stop();
+    player.stop();
 
     await interaction.editReply({
       embeds: [
@@ -191,9 +209,13 @@ export class MusicController {
     description: 'Pauses audio player',
   })
   async pause(interaction: CommandInteraction) {
-    await interaction.deferReply();
-
-    this.player.pause();
+    const player = this.connection.players.get(
+      InteractionExtension.getGuild(interaction).id,
+    );
+    if (!player) {
+      return;
+    }
+    player.pause();
 
     await interaction.editReply({
       embeds: [buildGeneralResponse(new EmbedBuilder()).setTitle('Paused')],
@@ -204,9 +226,14 @@ export class MusicController {
     description: 'Pauses audio player',
   })
   async unpause(interaction: CommandInteraction) {
-    await interaction.deferReply();
+    const player = this.connection.players.get(
+      InteractionExtension.getGuild(interaction).id,
+    );
+    if (!player) {
+      return;
+    }
 
-    this.player.unpause();
+    player.unpause();
 
     await interaction.editReply({
       embeds: [buildGeneralResponse(new EmbedBuilder()).setTitle('Unpaused')],
@@ -217,9 +244,14 @@ export class MusicController {
     description: 'Clears audio queue',
   })
   async clear(interaction: CommandInteraction) {
-    await interaction.deferReply();
+    const player = this.connection.players.get(
+      InteractionExtension.getGuild(interaction).id,
+    );
+    if (!player) {
+      return;
+    }
 
-    this.urls.clear();
+    player.urls.clear();
 
     await interaction.editReply({
       embeds: [

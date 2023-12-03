@@ -8,6 +8,9 @@ import { GuildModule } from './guild/guild.module';
 import { GuildModel } from './models/guild/guild.model';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { DiscordModule } from './discord/discord.module';
+import { ProfileController } from './profile/profile.controller';
+import { ProfileModule } from './profile/profile.module';
+import { ProfileModel } from './models/profile/profile.model';
 
 @Module({
   imports: [
@@ -19,7 +22,7 @@ import { DiscordModule } from './discord/discord.module';
       username: 'root',
       password: '1jvc19Dk',
       database: 'nest_db',
-      models: [UserModel, GuildModel],
+      models: [UserModel, GuildModel, ProfileModel],
     }),
     ThrottlerModule.forRoot([
       {
@@ -42,8 +45,9 @@ import { DiscordModule } from './discord/discord.module';
     UserModule,
     GuildModule,
     DiscordModule,
+    ProfileModule,
   ],
-  controllers: [],
+  controllers: [ProfileController],
   providers: [],
 })
 export class AppModule {}
