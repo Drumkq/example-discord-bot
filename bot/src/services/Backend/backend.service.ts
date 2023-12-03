@@ -33,7 +33,7 @@ export class BackendService {
         url: `${this.config.get<string>('APP_BASE_ENDPOINT')}/${path}`,
         method: method,
         data: data,
-        headers: { 'X-API-KEY': this.config.get<string>('CLIENT_SECRET') },
+        headers: { 'X-API-KEY': this.config.get<string>('CLIENT_TOKEN') },
       })
     ).data;
   }

@@ -13,7 +13,7 @@ export class DiscordService implements Bootstrap {
   constructor(private readonly config: ConfigService) {}
 
   async initialize(): Promise<void> {
-    await this.client.login(this.config.get<string>('CLIENT_SECRET'));
+    await this.client.login(this.config.get<string>('CLIENT_TOKEN'));
     await dl.setToken({
       youtube: { cookie: this.config.get<string>('YT_COOCKIE') },
     });

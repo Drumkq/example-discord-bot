@@ -48,7 +48,6 @@ export class GuildService {
   async getGuilds(ownerId: string): Promise<IGuild[]> {
     const guilds = await this.guildModel.findAll({
       where: { ownerId: ownerId },
-      plain: true,
     });
 
     return guilds;

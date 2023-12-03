@@ -48,7 +48,7 @@ export class DiscordService {
         await axios<T>(`${this.DISCORD_ROUTE}/${route}`, {
           method: method,
           headers: {
-            Authorization: `Bot ${this.config.get<string>('CLIENT_SECRET')}`,
+            Authorization: `Bot ${this.config.get<string>('CLIENT_TOKEN')}`,
           },
         })
       ).data;

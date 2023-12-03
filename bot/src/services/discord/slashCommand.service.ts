@@ -17,7 +17,7 @@ export class SlashCommandService implements Bootstrap {
     private readonly cooldowns: SlashCommandCooldownService,
   ) {
     this.rest = new REST({ version: '10' }).setToken(
-      config.get<string>('CLIENT_SECRET'),
+      config.get<string>('CLIENT_TOKEN'),
     );
   }
 
