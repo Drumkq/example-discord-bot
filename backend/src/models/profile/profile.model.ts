@@ -1,31 +1,14 @@
-import { Column, Model, Table } from 'sequelize-typescript';
-import { NUMBER, STRING } from 'sequelize';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { IProfile } from './profile.interface';
 
-@Table({ timestamps: false, tableName: 'Profiles' })
-export class ProfileModel extends Model<IProfile> {
-  @Column({
-    primaryKey: true,
-    unique: true,
-    type: NUMBER,
-    defaultValue: 0,
-    validate: { notEmpty: true, isNumeric: true },
-  })
+@Entity('Profile')
+export class ProfileModel implements IProfile {
+  @PrimaryColumn()
   id: number;
 
-  @Column({
-    unique: true,
-    type: STRING,
-    validate: { notEmpty: true },
-  })
+  @Column('text', { unique: true })
   userId: string;
 
-  @Column({
-    primaryKey: true,
-    unique: true,
-    type: NUMBER,
-    defaultValue: 0,
-    validate: { notEmpty: true, isNumeric: true },
-  })
+  @Column('int', { default: 0 })
   dickSize: number;
 }

@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'passport-discord';
 import { IUser } from 'src/models/user/user.interface';
-import { UserService } from 'src/user/user.service';
+import { UserModel } from 'src/models/user/user.model';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    @InjectRepository(UserModel)
+    private readonly userModel: Repository<UserModel>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -16,27 +19,29 @@ export class AuthService {
     accessToken: string,
     refreshToken: string,
   ): Promise<IUser> {
-    const user = await this.userService.getUser(profile.id);
+    const user = await this.userModel.findOne({
+      where: { userId: profile.id },
+    });
 
     if (!user) {
-      return await this.userService.createUser({
+      return await this.userModel.save({
+        accessToken: accessToken,
+        refreshToken: refreshToken,
         userId: profile.id,
-        id: null,
-        accessToken,
-        refreshToken,
       });
     }
 
     const isTokensDifferent =
-      user.accessToken === accessToken && user.refreshToken === refreshToken;
+      user.accessToken !== accessToken || user.refreshToken !== refreshToken;
 
     if (isTokensDifferent) {
-      user.set('accessToken', accessToken);
-      user.set('refreshToken', refreshToken);
-      await user.save();
+      user.accessToken = accessToken;
+      user.refreshToken = refreshToken;
+
+      await this.userModel.update(user.id, user);
     }
 
-    return user.get({ plain: true });
+    return user;
   }
 
   async validateKey(secret: string): Promise<boolean> {

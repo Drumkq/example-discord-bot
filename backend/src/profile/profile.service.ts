@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ChangeProfileDto } from 'src/models/profile/changeProfile.dto';
 import { ProfileModel } from 'src/models/profile/profile.model';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    @InjectModel(ProfileModel)
-    private readonly profileModel: typeof ProfileModel,
+    @InjectRepository(ProfileModel)
+    private readonly profileModel: Repository<ProfileModel>,
   ) {}
 
   public async getProfile(userId: string) {
@@ -15,14 +16,14 @@ export class ProfileService {
 
     return profile !== null
       ? profile
-      : await this.profileModel.create({ userId });
+      : await this.profileModel.save({ userId });
   }
 
   public async patchProfile(
     userId: string,
     dto: ChangeProfileDto,
   ): Promise<ChangeProfileDto> {
-    await this.profileModel.update(dto, { where: { userId: userId } });
+    await this.profileModel.update({ userId }, dto);
 
     return dto;
   }

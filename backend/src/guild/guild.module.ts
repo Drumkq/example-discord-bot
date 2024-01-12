@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { GuildService } from './guild.service';
 import { GuildController } from './guild.controller';
-import { SequelizeModule } from '@nestjs/sequelize';
 import { GuildModel } from 'src/models/guild/guild.model';
 import { DiscordModule } from 'src/discord/discord.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [SequelizeModule.forFeature([GuildModel]), DiscordModule],
+  imports: [TypeOrmModule.forFeature([GuildModel]), DiscordModule],
   providers: [GuildService],
   controllers: [GuildController],
   exports: [GuildService],

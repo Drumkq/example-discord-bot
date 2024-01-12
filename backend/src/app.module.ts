@@ -1,29 +1,21 @@
 import { Module } from '@nestjs/common';
-import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { UserModel } from './models/user/user.model';
 import { GuildModule } from './guild/guild.module';
-import { GuildModel } from './models/guild/guild.model';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { DiscordModule } from './discord/discord.module';
 import { ProfileController } from './profile/profile.controller';
 import { ProfileModule } from './profile/profile.module';
-import { ProfileModel } from './models/profile/profile.model';
+import { MusicModule } from './music/music.module';
+import { GuildStateModule } from './guild-state/guild-state.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { dataSourceOptions } from 'src/db/data-source';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    SequelizeModule.forRoot({
-      dialect: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '1jvc19Dk',
-      database: 'nest_db',
-      models: [UserModel, GuildModel, ProfileModel],
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
     ThrottlerModule.forRoot([
       {
         name: 'short',
@@ -46,6 +38,8 @@ import { ProfileModel } from './models/profile/profile.model';
     GuildModule,
     DiscordModule,
     ProfileModule,
+    MusicModule,
+    GuildStateModule,
   ],
   controllers: [ProfileController],
   providers: [],

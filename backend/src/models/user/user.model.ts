@@ -1,31 +1,17 @@
-import { Column, Model, Table } from 'sequelize-typescript';
-import { NUMBER, STRING } from 'sequelize';
 import { IUser } from './user.interface';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Table({ timestamps: false, tableName: 'Users' })
-export class UserModel extends Model<IUser> {
-  @Column({
-    primaryKey: true,
-    unique: true,
-    type: NUMBER,
-    validate: { notEmpty: true, isNumeric: true },
-  })
+@Entity('User')
+export class UserModel implements IUser {
+  @PrimaryColumn()
   id: number;
 
-  @Column({
-    unique: true,
-    type: STRING,
-    validate: { notEmpty: true },
-  })
+  @Column('text', { unique: true })
   userId: string;
 
-  @Column({
-    type: STRING,
-  })
+  @Column('text', { nullable: true })
   accessToken?: string;
 
-  @Column({
-    type: STRING,
-  })
+  @Column('text', { nullable: true })
   refreshToken?: string;
 }

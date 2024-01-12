@@ -1,8 +1,8 @@
 import { AudioResource } from '@discordjs/voice';
 
 export type AudioUrlInfo = {
-  type: 'youtube';
-  url: string;
+  readonly type: 'youtube';
+  readonly url: string;
 };
 
 export type AudioInfo = {

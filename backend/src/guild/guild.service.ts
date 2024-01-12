@@ -1,52 +1,56 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
 import { CreateGuildDto } from 'src/models/guild/createGuild.dto';
 import { GuildModel } from 'src/models/guild/guild.model';
 import { IGuild } from 'src/models/guild/guild.interface';
 import { DiscordService } from 'src/discord/discord.service';
 import { IUser } from 'src/models/user/user.interface';
 import { Features } from 'src/models/utils/features.enum';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class GuildService {
   constructor(
-    @InjectModel(GuildModel) private readonly guildModel: typeof GuildModel,
+    @InjectRepository(GuildModel)
+    private readonly guildModel: Repository<GuildModel>,
     private readonly discord: DiscordService,
   ) {}
 
   async addGuild(dto: CreateGuildDto) {
-    return await this.guildModel.create(dto);
+    const entity = this.guildModel.create(dto);
+    return await this.guildModel.save(entity);
   }
 
   async botLeavedGuild(guildId: string) {
     const guild = await this.guildModel.findOne({
       where: { guildId: guildId },
-      plain: true,
     });
 
-    return await guild.update('botInvited', false);
+    guild.botInvited = false;
+
+    return await this.guildModel.update(guild.id, guild);
   }
 
   async botJoinedGuild(guildId: string) {
     const guild = await this.guildModel.findOne({
       where: { guildId: guildId },
-      plain: true,
     });
 
-    return await guild.update('botInvited', true);
+    guild.botInvited = true;
+
+    return await this.guildModel.update(guild.id, guild);
   }
 
   async patchGuild(guildId: string, dto: Omit<IGuild, 'guildId'>) {
     const guild = await this.guildModel.findOne({
       where: { guildId: guildId },
-      plain: true,
     });
 
-    return await guild.update(dto);
+    return await this.guildModel.update(guild.id, dto);
   }
 
   async getGuilds(ownerId: string): Promise<IGuild[]> {
-    const guilds = await this.guildModel.findAll({
+    const guilds = await this.guildModel.find({
       where: { ownerId: ownerId },
     });
 
@@ -56,7 +60,6 @@ export class GuildService {
   async getGuildOrCreate(user: IUser, guildId: string) {
     const guild = await this.guildModel.findOne({
       where: { guildId: guildId },
-      plain: true,
     });
 
     if (!guild) {

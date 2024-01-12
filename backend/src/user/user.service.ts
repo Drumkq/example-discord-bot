@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
+import { InjectRepository } from '@nestjs/typeorm';
 import { DiscordService } from 'src/discord/discord.service';
 import { CreateUserDto } from 'src/models/user/user.dto';
 import { IUser } from 'src/models/user/user.interface';
 import { UserModel } from 'src/models/user/user.model';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(UserModel) private readonly userModel: typeof UserModel,
+    @InjectRepository(UserModel)
+    private readonly userModel: Repository<UserModel>,
     private readonly discord: DiscordService,
   ) {}
 
