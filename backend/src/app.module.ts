@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { GuildModule } from './guild/guild.module';
@@ -7,10 +7,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { DiscordModule } from './discord/discord.module';
 import { ProfileController } from './profile/profile.controller';
 import { ProfileModule } from './profile/profile.module';
-import { MusicModule } from './music/music.module';
 import { GuildStateModule } from './guild-state/guild-state.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from 'src/db/data-source';
+import { HttpModule } from '@nestjs/axios';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-ioredis-yet';
 
 @Module({
   imports: [
@@ -33,12 +35,24 @@ import { dataSourceOptions } from 'src/db/data-source';
         limit: 100,
       },
     ]),
+    HttpModule.register({
+      timeout: 5000,
+      maxRedirects: 5,
+    }),
+    CacheModule.register({
+      useFactory: async (config: ConfigService) => ({
+        store: await redisStore({
+          host: config.get<string>('REDIS_URI'),
+        }),
+      }),
+      isGlobal: true,
+      inject: [ConfigService],
+    }),
     AuthModule,
     UserModule,
     GuildModule,
     DiscordModule,
     ProfileModule,
-    MusicModule,
     GuildStateModule,
   ],
   controllers: [ProfileController],

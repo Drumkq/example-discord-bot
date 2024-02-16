@@ -45,6 +45,6 @@ export class AuthService {
   }
 
   async validateKey(secret: string): Promise<boolean> {
-    return this.configService.get<string>('CLIENT_TOKEN') === secret;
+    return this.configService.get<string>('CLIENT_SECRET') === secret;
   }
 }

@@ -1,26 +1,28 @@
 import { IWelcomeConfig } from './welcome/welcome.interface';
 import { IModerationConfig } from './moderation/moderation.interface';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('GuildConfig')
 export class GuildConfigModel implements IWelcomeConfig, IModerationConfig {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column('text', { unique: true })
+  @Column('varchar', { unique: true })
   guildId: string;
 
-  @Column('boolean')
+  @Column()
   capsCheck: boolean;
 
-  @Column('boolean')
+  @Column()
   nsfwCheck: boolean;
 
-  @Column('boolean')
+  @Column()
   guildLinksCheck: boolean;
 
-  @Column('simple-array', { array: true })
-  roles: string[];
+  @Column('text', { nullable: true })
+  rolesStr?: string;
+
+  roles?: string[] = this.rolesStr?.split(' ');
 
   @Column('text')
   message: string;

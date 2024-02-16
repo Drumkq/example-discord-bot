@@ -1,38 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { GuildState } from './types/guild-state.type';
-import { Track } from 'src/music/types/track.type';
+import { GuildState } from './dto/guild-state.dto';
+import { Track } from './dto/track.dto';
 
 @Injectable()
 export class GuildStateService {
-  private readonly state = new Map<string, GuildState>();
+  public readonly states = new Map<string, GuildState>();
 
-  public addTrack(guildId: string, track: Track) {
+  public addTrack(guildId: string, track: Track): Track[] {
     const state = this.getState(guildId);
 
-    state.audioQueue.push(track);
+    state.trackQueue.push(track);
+
+    return state.trackQueue;
   }
 
   public popTracks(guildId: string, n: number): Track[] {
-    const state = this.getState(guildId);
-    if (n <= 0) return [];
-
-    const erasedTracks = new Array<Track>();
-
-    for (let i = 0; i < n; i++) {
-      erasedTracks.push(state.audioQueue.shift());
+    const state = this.states.get(guildId);
+    if (!state || state.trackQueue.length == 0) {
+      // Queue empty exception
     }
 
-    return erasedTracks;
+    if (n <= 0) return state.trackQueue;
+
+    for (let i = 0; i < n; i++) {
+      state.trackQueue.shift();
+    }
+
+    return state.trackQueue;
   }
 
   private getState(guildId: string): GuildState {
-    const state = this.state.get(guildId);
-    if (!state) {
-      const state: GuildState = {
-        audioQueue: [],
-      };
+    const state = this.states.get(guildId);
+    if (state === undefined) {
+      const state: GuildState = new GuildState();
 
-      this.state.set(guildId, state);
+      this.states.set(guildId, state);
 
       return state;
     }

@@ -7,14 +7,25 @@ services:
     environment:
       - MYSQL_ROOT_USER=root
       - MYSQL_ROOT_PASSWORD=1jvc19Dk
-      - MYSQL_DATABASE=nest_db
+      - MYSQL_DATABASE=database_development
       - MYSQL_USER:root
       - MYSQL_PASSWORD:1jvc19Dk
     ports:
-      - 3306:3306
+      - '3306:3306'
+    volumes:
+      - ./databases:/var/lib/mysql
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - '8080:8080'
+
+  redis:
+    image: redis
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_PASS"
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '6779:6779'

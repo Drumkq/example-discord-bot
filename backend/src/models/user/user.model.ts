@@ -1,12 +1,12 @@
 import { IUser } from './user.interface';
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('User')
 export class UserModel implements IUser {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column('text', { unique: true })
+  @Column('varchar', { unique: true })
   userId: string;
 
   @Column('text', { nullable: true })

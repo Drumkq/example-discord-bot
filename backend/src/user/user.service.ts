@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DiscordService } from 'src/discord/discord.service';
-import { CreateUserDto } from 'src/models/user/user.dto';
+import { CreateUserDto } from 'src/models/user/createUser.dto';
 import { IUser } from 'src/models/user/user.interface';
 import { UserModel } from 'src/models/user/user.model';
 import { Repository } from 'typeorm';
@@ -15,7 +15,7 @@ export class UserService {
   ) {}
 
   async getGuilds(user: IUser) {
-    return (await this.discord.getUserGuilds(user)).map((v) => v.owner);
+    return await this.discord.getUserGuilds(user);
   }
 
   async isInGuild(/*guildId: string, ids: string[]*/) {}

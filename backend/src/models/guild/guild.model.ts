@@ -1,30 +1,32 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Features } from '../utils/features.enum';
 import { IGuild } from './guild.interface';
 
 @Entity('Guild')
 export class GuildModel implements IGuild {
-  @PrimaryColumn()
-  id: number;
+  @PrimaryGeneratedColumn('increment')
+  public id: number;
 
-  @Column('text', { unique: true })
-  guildId: string;
+  @Column('varchar', { unique: true })
+  public guildId: string;
 
-  @Column('boolean')
-  botInvited: boolean;
-
-  @Column('text')
-  ownerId: string;
-
-  @Column('simple-array', { array: true })
-  coownerIds?: string[];
+  @Column()
+  public botInvited: boolean;
 
   @Column('text')
-  icon: string;
+  public ownerId: string;
+
+  @Column('text', { nullable: true, name: 'coownerIds' })
+  public coownerIdsStr?: string;
+
+  public coownerIds?: string[] = this.coownerIdsStr?.split(' ');
 
   @Column('text')
-  name: string;
+  public icon: string;
+
+  @Column('text')
+  public name: string;
 
   @Column('int', { default: 0 })
-  features: Features;
+  public features: Features;
 }

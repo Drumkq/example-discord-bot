@@ -14,6 +14,7 @@ export class ApiKeyStraregy extends PassportStrategy(Strategy, 'api-key') {
   async validate(apiKey: string, done: (error: Error, data) => void) {
     if (await this.authService.validateKey(apiKey)) {
       done(null, true);
+      return;
     }
 
     done(new UnauthorizedException(), null);

@@ -1,4 +1,4 @@
 export interface IWelcomeConfig {
-  roles: string[];
+  roles?: string[];
   message: string;
 }

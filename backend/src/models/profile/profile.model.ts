@@ -1,14 +1,14 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { IProfile } from './profile.interface';
 
 @Entity('Profile')
 export class ProfileModel implements IProfile {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column('text', { unique: true })
+  @Column('varchar', { unique: true })
   userId: string;
 
-  @Column('int', { default: 0 })
+  @Column({ default: 0 })
   dickSize: number;
 }
