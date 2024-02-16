@@ -1,10 +1,13 @@
-FROM node:latest
+FROM node AS development
 LABEL authors="drumkq"
 MAINTAINER "drumkq https://github.com/drumkq"
 
-WORKDIR /src
+WORKDIR ./src
 COPY package*.json ./
+COPY tsconfig.build.json ./
+COPY tsconfig.json ./
+
 RUN npm install
+
 COPY . .
-RUN npm run build
-CMD [ "npm", "run", "start:dev" ]
+EXPOSE 3000
