@@ -1,6 +1,6 @@
 import { Controller } from '../decorators/controller.decorator';
 import { Once } from '../decorators/events/once.decorator';
-import { BackendService } from '../services/Backend/backend.service';
+import { BackendService } from '../services/backend/backend.service';
 import { DiscordService } from '../services/discord/discord.service';
 import { inject } from 'inversify';
 

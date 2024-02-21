@@ -6,5 +6,8 @@ namespace NodeJS {
     PORT: number;
     CLIENT_ID: string;
     CLIENT_SECRET: string;
+    BOT_TOKEN: string;
+    YT_COOKIE: string;
+    API_ENDPOINT: string;
   }
 }

@@ -2,7 +2,8 @@ import {
   Body,
   Controller,
   Delete,
-  Get, HttpCode,
+  Get,
+  HttpCode,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -16,7 +17,6 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
-  ApiResponse,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
@@ -101,8 +101,12 @@ export class GuildStateController {
     description: 'Discord guild id',
     name: 'guildId',
   })
-  async addTrack(@Param('guildId') guildId, @Body() track: Track) {
-    return this.stateService.addTrack(guildId, track);
+  async addTrack(@Param('guildId') guildId, @Body() track: Track | Track[]) {
+    if (Array.isArray(track)) {
+      return this.stateService.addTracks(guildId, track);
+    } else {
+      return this.stateService.addTrack(guildId, track);
+    }
   }
 
   @Get('tracks/:guildId')
@@ -133,7 +137,7 @@ export class GuildStateController {
     const state = this.stateService.states.get(guildId);
 
     if (!state) {
-      throw new NotFoundException();
+      return [];
     }
 
     return state.trackQueue;
@@ -173,6 +177,10 @@ export class GuildStateController {
     @Param('guildId') guildId,
     @Query('number', ParseIntPipe) n: number,
   ) {
-    return this.stateService.popTracks(guildId, n);
+    if (n == -1) {
+      return this.stateService.clearTracks(guildId);
+    } else {
+      return this.stateService.popTracks(guildId, n);
+    }
   }
 }

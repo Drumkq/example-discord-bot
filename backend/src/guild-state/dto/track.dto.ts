@@ -1,5 +1,5 @@
 import { IsEnum, IsString } from 'class-validator';
-import { TrackType, TrType } from '../enums/track-type.enum';
+import { TrackType } from '../enums/track-type.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Track {

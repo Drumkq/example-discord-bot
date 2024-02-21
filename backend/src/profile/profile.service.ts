@@ -39,7 +39,7 @@ export class ProfileService {
   }
 
   public async patchProfile(userId: string, dto: ChangeProfileDto) {
-    const profile = this.profileModel.findOne({ where: { userId } });
+    const profile = await this.profileModel.findOne({ where: { userId } });
 
     if (!profile) {
       throw new NotFoundException();
@@ -51,7 +51,7 @@ export class ProfileService {
   }
 
   async deleteProfile(userId: string) {
-    const profile = this.profileModel.findOne({ where: { userId } });
+    const profile = await this.profileModel.findOne({ where: { userId } });
 
     if (!profile) {
       throw new NotFoundException();

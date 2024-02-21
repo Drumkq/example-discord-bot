@@ -1,0 +1,5 @@
+databases
+dist
+node_modules
+.idea
+.vscode

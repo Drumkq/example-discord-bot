@@ -26,7 +26,7 @@ export class NunitApp {
     );
     this.controllersBuilder.build();
 
-    client.initialize();
-    slashCommand.initialize();
+    await client.initialize();
+    await slashCommand.initialize();
   }
 }

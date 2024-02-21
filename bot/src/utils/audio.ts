@@ -1,4 +1,5 @@
 import { AudioResource } from '@discordjs/voice';
+import * as dl from 'play-dl';
 
 export type AudioUrlInfo = {
   readonly type: 'youtube';
@@ -7,17 +8,5 @@ export type AudioUrlInfo = {
 
 export type AudioInfo = {
   readonly resource: AudioResource;
-  readonly info: {
-    readonly duration: string;
-    readonly views: number;
-    readonly likes: number;
-
-    readonly title: string;
-    readonly icon: string;
-    readonly urlToAudio: AudioUrlInfo;
-
-    readonly authorName?: string;
-    readonly authorIcon?: string;
-    readonly urlToAuthor?: string;
-  };
+  readonly info: dl.InfoData;
 };

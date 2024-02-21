@@ -14,19 +14,40 @@ export class GuildStateService {
     return state.trackQueue;
   }
 
+  public addTracks(guildId: string, tracks: Track[]): Track[] {
+    const state = this.getState(guildId);
+
+    state.trackQueue.push(...tracks);
+
+    return state.trackQueue;
+  }
+
   public popTracks(guildId: string, n: number): Track[] {
     const state = this.states.get(guildId);
-    if (!state || state.trackQueue.length == 0) {
-      // Queue empty exception
+    if (!state) {
+      return [];
     }
 
     if (n <= 0) return state.trackQueue;
 
-    for (let i = 0; i < n; i++) {
-      state.trackQueue.shift();
+    state.trackQueue.splice(0, n);
+
+    if (state.trackQueue.length === 0) {
+      this.states.delete(guildId);
+      return [];
     }
 
     return state.trackQueue;
+  }
+
+  public clearTracks(guildId: string) {
+    const state = this.states.get(guildId);
+    if (!state) {
+      return [];
+    }
+
+    state.trackQueue.length = 0;
+    this.states.delete(guildId);
   }
 
   private getState(guildId: string): GuildState {

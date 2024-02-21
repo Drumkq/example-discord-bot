@@ -10,10 +10,14 @@ import {
 import { Service } from '../../decorators/service.decorator';
 import { Player } from '../../utils/player';
 import { AudioService } from './audio.service';
+import { BackendService } from '../backend/backend.service';
 
 @Service
 export class ConnectionService {
-  constructor(private readonly audio: AudioService) {}
+  constructor(
+    private readonly audio: AudioService,
+    private readonly backend: BackendService,
+  ) {}
 
   public readonly players = new Map<string, Player>();
   private readonly playerSubscriptions = new Map<string, PlayerSubscription>();
@@ -33,7 +37,7 @@ export class ConnectionService {
       if (player) {
         this.subscribe(voiceConnection, player, options.guildId);
       } else {
-        const player = new Player(this.audio);
+        const player = new Player(this.audio, this.backend, options.guildId);
         this.players.set(options.guildId, player);
         this.subscribe(voiceConnection, player, options.guildId);
       }

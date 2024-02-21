@@ -6,10 +6,15 @@ import { ConnectionService } from '../services/music/connection.service';
 import { InteractionExtension } from '../utils/interaction.extension';
 import { InvalidGuildExecution } from '../exceptions/invalidExecution';
 import { buildGeneralResponse } from '../utils/interaction.responses';
+import { BackendService } from '../services/backend/backend.service';
+import { TrackType } from '../services/backend/state/tracks/track-type.enum';
 
 @Controller
 export class MusicController {
-  constructor(private readonly connection: ConnectionService) {}
+  constructor(
+    private readonly connection: ConnectionService,
+    private readonly backend: BackendService,
+  ) {}
 
   @SlashCommand({
     description: 'Adds a new song to the guild queue',
@@ -35,48 +40,50 @@ export class MusicController {
       return;
     }
 
-    player.urls.addUrl({ type: 'youtube', url: url });
-    const audios = await player.play(false);
+    await player.addTrack({ url, type: TrackType.YOUTUBE });
+    const audios = !player.player.checkPlayable()
+      ? await player.play()
+      : await player.getQueue();
     if (audios === undefined) {
       interaction.editReply('No audio to play');
       return;
     }
 
-    const { currentAudio, nextAudio } = audios;
+    const { current, next } = audios;
     await interaction.editReply({
       embeds: [
         buildGeneralResponse(new EmbedBuilder())
-          .setTitle(currentAudio.info.title)
-          .setURL(currentAudio.info.urlToAudio.url)
+          .setTitle(current.video_details.title || '')
+          .setURL(current.video_details.url)
           .setAuthor({
-            name: currentAudio.info.authorName || '',
-            url: currentAudio.info.urlToAuthor,
-            iconURL: currentAudio.info.authorIcon || '',
+            name: current.video_details.channel?.name || '',
+            url: current.video_details.channel?.url || '',
+            iconURL: current.video_details.channel?.icons?.at(0)?.url || '',
           })
-          .setThumbnail(currentAudio.info.icon)
+          .setThumbnail(current.video_details.thumbnails.at(0)?.url)
           .setFields(
             {
               name: 'Duration',
-              value: currentAudio.info.duration,
+              value: current.video_details.durationRaw,
               inline: true,
             },
             {
               name: 'Views',
-              value: currentAudio.info.views.toString(),
+              value: current.video_details.views.toString(),
               inline: true,
             },
             {
               name: 'Likes',
-              value: currentAudio.info.likes.toString(),
+              value: current.video_details.likes.toString(),
               inline: true,
             },
             {
               name: 'Next audio',
-              value: nextAudio?.info.title || 'No audio',
+              value: next?.video_details.title || 'No audio',
               inline: false,
             },
           )
-          .setImage(nextAudio?.info.icon || null),
+          .setImage(next?.video_details.thumbnails.at(0)?.url || null),
       ],
     });
   }
@@ -92,10 +99,9 @@ export class MusicController {
       return;
     }
 
-    const audios = await player.play(true);
-    if (!audios) {
-      player.stop();
-
+    await player.stop();
+    const audios = await player.play();
+    if (audios === undefined) {
       await interaction.editReply({
         embeds: [
           buildGeneralResponse(new EmbedBuilder()).setTitle(
@@ -107,42 +113,41 @@ export class MusicController {
       return;
     }
 
-    const { currentAudio, nextAudio } = audios;
-
+    const { current, next } = audios;
     await interaction.editReply({
       embeds: [
         buildGeneralResponse(new EmbedBuilder())
-          .setTitle(currentAudio.info.title)
-          .setURL(currentAudio.info.urlToAudio.url)
+          .setTitle(current.video_details.title || '')
+          .setURL(current.video_details.url)
           .setAuthor({
-            name: currentAudio.info.authorName || '',
-            url: currentAudio.info.urlToAuthor,
-            iconURL: currentAudio.info.authorIcon,
+            name: current.video_details.channel?.name || '',
+            url: current.video_details.channel?.url || '',
+            iconURL: current.video_details.channel?.icons?.at(0)?.url || '',
           })
-          .setThumbnail(currentAudio.info.icon)
+          .setThumbnail(current.video_details.thumbnails.at(0)?.url)
           .setFields(
             {
               name: 'Duration',
-              value: currentAudio.info.duration,
+              value: current.video_details.durationRaw,
               inline: true,
             },
             {
               name: 'Views',
-              value: currentAudio.info.views.toString(),
+              value: current.video_details.views.toString(),
               inline: true,
             },
             {
               name: 'Likes',
-              value: currentAudio.info.likes.toString(),
+              value: current.video_details.likes.toString(),
               inline: true,
             },
             {
               name: 'Next audio',
-              value: nextAudio?.info.title || 'No audio',
+              value: next?.video_details.title || 'No audio',
               inline: false,
             },
           )
-          .setImage(nextAudio?.info.icon || null),
+          .setImage(next?.video_details.thumbnails.at(0)?.url || null),
       ],
     });
   }
@@ -179,29 +184,17 @@ export class MusicController {
     description: 'Stops audio player and clears the guild queue',
   })
   async stop(interaction: CommandInteraction) {
-    const player = this.connection.players.get(
-      InteractionExtension.getGuild(interaction).id,
-    );
+    const guildId = InteractionExtension.getGuild(interaction).id;
+    const player = this.connection.players.get(guildId);
     if (!player) {
       return;
     }
 
-    if (!player.isPlaying) {
-      await interaction.editReply({
-        embeds: [
-          buildGeneralResponse(new EmbedBuilder()).setTitle('No audio to skip'),
-        ],
-      });
-
-      return;
-    }
-
     player.stop();
+    this.connection.leave(guildId);
 
     await interaction.editReply({
-      embeds: [
-        buildGeneralResponse(new EmbedBuilder()).setTitle('Audio stopped'),
-      ],
+      embeds: [buildGeneralResponse(new EmbedBuilder()).setTitle('Stopped')],
     });
   }
 
@@ -251,7 +244,7 @@ export class MusicController {
       return;
     }
 
-    player.urls.clear();
+    player.clear();
 
     await interaction.editReply({
       embeds: [

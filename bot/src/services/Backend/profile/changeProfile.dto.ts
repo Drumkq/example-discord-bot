@@ -1,3 +1,3 @@
-export type ChangeProfileDto = {
-  readonly dickSize: number;
-};
+export class ChangeProfileDto {
+  public readonly dickSize: number;
+}

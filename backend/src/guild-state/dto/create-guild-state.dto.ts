@@ -1,4 +1,4 @@
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional } from 'class-validator';
 import { Track } from './track.dto';
 import { ApiProperty } from '@nestjs/swagger';
 

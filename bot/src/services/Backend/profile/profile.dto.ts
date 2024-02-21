@@ -1,5 +1,5 @@
-export type Profile = {
-  id: number;
-  userId: string;
-  dickSize: number;
-};
+export class ProfileDto {
+  public readonly id: number;
+  public readonly userId: string;
+  public readonly dickSize: number;
+}
