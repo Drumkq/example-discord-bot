@@ -1,1 +1,1 @@
-Project built with
+Unfinished educational project
